@@ -4,7 +4,8 @@
 
 use crate::scalar::{ComplexField, Field, SubsetOf, SupersetOf};
 use crate::simd::{
-    SimdBool, SimdComplexField, SimdPartialOrd, SimdRealField, SimdSigned, SimdValue,
+    PrimitiveSimdValue, SimdBool, SimdComplexField, SimdPartialOrd, SimdRealField, SimdSigned,
+    SimdValue,
 };
 use approx::AbsDiffEq;
 #[cfg(feature = "decimal")]
@@ -40,6 +41,8 @@ where
         write!(f, ")")
     }
 }
+
+impl<N: PrimitiveSimdValue> PrimitiveSimdValue for Simd<N> {}
 
 impl<N: SimdValue> SimdValue for Simd<N> {
     type Element = N::Element;
@@ -195,6 +198,8 @@ impl_scalar_subset_of_simd!(d128);
 
 macro_rules! impl_simd_value(
     ($($t: ty, $elt: ty, $bool: ty;)*) => ($(
+        impl PrimitiveSimdValue for $t {}
+
         impl SimdValue for $t {
             type Element = $elt;
             type SimdBool = $bool;
@@ -240,6 +245,13 @@ macro_rules! impl_simd_value(
 macro_rules! impl_uint_simd(
     ($($t: ty, $elt: ty, $bool: ty;)*) => ($(
         impl_simd_value!($t, $elt, $bool;);
+
+        impl From<[$elt; <$t>::lanes()]> for Simd<$t> {
+            #[inline(always)]
+            fn from(vals: [$elt; <$t>::lanes()]) -> Self {
+                Simd(<$t>::from(vals))
+            }
+        }
 
         impl SubsetOf<Simd<$t>> for Simd<$t> {
             #[inline(always)]
@@ -1436,6 +1448,30 @@ impl_simd_bool!(
     packed_simd::msizex4;
     packed_simd::msizex8;
 );
+
+//
+// NOTE: the following does not work because of the orphan rules.
+//
+//macro_rules! impl_simd_complex_from(
+//    ($($t: ty, $elt: ty $(, $i: expr)*;)*) => ($(
+//        impl From<[num_complex::Complex<$elt>; <$t>::lanes()]> for num_complex::Complex<Simd<$t>> {
+//            #[inline(always)]
+//            fn from(vals: [num_complex::Complex<$elt>; <$t>::lanes()]) -> Self {
+//                num_complex::Complex {
+//                    re: <$t>::from([$(vals[$i].re),*]),
+//                    im: <$t>::from([$(vals[$i].im),*]),
+//                }
+//            }
+//        }
+//    )*)
+//);
+//
+//impl_simd_complex_from!(
+//    packed_simd::f32x2, f32, 0, 1;
+//    packed_simd::f32x4, f32, 0, 1, 2, 3;
+//    packed_simd::f32x8, f32, 0, 1, 2, 3, 4, 5, 6, 7;
+//    packed_simd::f32x16, f32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15;
+//);
 
 //////////////////////////////////////////
 //               Aliases                //

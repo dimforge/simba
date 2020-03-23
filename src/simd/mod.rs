@@ -8,7 +8,7 @@ pub use self::simd_option::SimdOption;
 pub use self::simd_partial_ord::SimdPartialOrd;
 pub use self::simd_real::SimdRealField;
 pub use self::simd_signed::SimdSigned;
-pub use self::simd_value::SimdValue;
+pub use self::simd_value::{PrimitiveSimdValue, SimdValue};
 
 mod simd_bool;
 mod simd_complex;

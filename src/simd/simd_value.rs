@@ -52,6 +52,12 @@ pub trait SimdValue: Sized {
     }
 }
 
+/// Marker trait which is only implemented by numeric primitive types.
+///
+/// Are primitives types all unsigned integer, integer, float, and complex types, as
+/// well as their SIMD variants.
+pub trait PrimitiveSimdValue: Copy + SimdValue {}
+
 impl<N: SimdValue> SimdValue for num_complex::Complex<N> {
     type Element = num_complex::Complex<N::Element>;
     type SimdBool = N::SimdBool;
@@ -106,8 +112,11 @@ impl<N: SimdValue> SimdValue for num_complex::Complex<N> {
     }
 }
 
-macro_rules! impl_simd_value_for_scalar(
+impl<N: PrimitiveSimdValue> PrimitiveSimdValue for num_complex::Complex<N> {}
+
+macro_rules! impl_primitive_simd_value_for_scalar(
     ($($t: ty),*) => {$(
+        impl PrimitiveSimdValue for $t {}
         impl SimdValue for $t {
             type Element = $t;
             type SimdBool = bool;
@@ -154,8 +163,8 @@ macro_rules! impl_simd_value_for_scalar(
     )*}
 );
 
-impl_simd_value_for_scalar!(
+impl_primitive_simd_value_for_scalar!(
     bool, u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize, f32, f64
 );
 #[cfg(feature = "decimal")]
-impl_simd_value_for_scalar!(decimal::d128);
+impl_primitive_simd_value_for_scalar!(decimal::d128);
