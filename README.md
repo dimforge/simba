@@ -26,7 +26,7 @@
 -----
 
 <p align = "center">
-<b>Linear algebra library</b>
+<b>SIMD algebra</b>
 <i>for the Rust programming language.</i>
 </p>
 
