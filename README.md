@@ -1,6 +1,9 @@
 # Simba - SIMD algebra for Rust
 
 <p align="center">
+  <img src="https://rustsim.org/img/logo_simba_wide_wide.svg" alt="simba logo">
+</p>
+<p align="center">
     <a href="https://discord.gg/vt9DJSW">
         <img src="https://img.shields.io/discord/507548572338880513.svg?logo=discord&colorB=7289DA">
     </a>
