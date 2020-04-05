@@ -8,12 +8,9 @@ use crate::simd::{
     SimdValue,
 };
 use approx::AbsDiffEq;
-#[cfg(feature = "decimal")]
-use decimal::d128;
 use num::{FromPrimitive, Num, One, Zero};
 use std::{
     cmp::PartialEq,
-    fmt,
     ops::{
         Add, AddAssign, BitAnd, BitOr, BitXor, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign,
         Sub, SubAssign,
@@ -27,7 +24,7 @@ use std::{
 #[derive(Copy, Clone, Debug)]
 pub struct WideF32x4(pub wide::f32x4);
 
-/// An SIMD boolean structure associated to `wide::f32x4` that implements all the relevant traits from `num` and `simba`.
+/// An SIMD boolean structure associated to `wide::f32x4` that implements all the relevant traits from `simba`.
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
