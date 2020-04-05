@@ -105,13 +105,13 @@ impl SimdValue for WideBoolF32x4 {
 
     #[inline(always)]
     fn replace(&mut self, i: usize, val: Self::Element) {
-        let vals = [0.0f32, f32::from_bits(u32::MAX)];
+        let vals = [0.0f32, f32::from_bits(std::u32::MAX)];
         self.0.as_mut()[i] = vals[val as usize];
     }
 
     #[inline(always)]
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
-        let vals = [0.0f32, f32::from_bits(u32::MAX)];
+        let vals = [0.0f32, f32::from_bits(std::u32::MAX)];
         *self.0.as_mut().get_unchecked_mut(i) = vals[val as usize];
     }
 
@@ -308,7 +308,7 @@ impl SubsetOf<WideF32x4> for WideF32x4 {
 impl From<[bool; 4]> for WideBoolF32x4 {
     #[inline(always)]
     fn from(vals: [bool; 4]) -> Self {
-        let bits = [0.0f32, f32::from_bits(u32::MAX)];
+        let bits = [0.0f32, f32::from_bits(std::u32::MAX)];
         WideBoolF32x4(wide::f32x4::new(
             bits[vals[0] as usize],
             bits[vals[1] as usize],
