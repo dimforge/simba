@@ -1,5 +1,6 @@
 #![allow(missing_docs)]
 #![allow(non_camel_case_types)] // For the simd type aliases.
+
 //! Traits for SIMD values.
 
 use crate::scalar::{ComplexField, Field, SubsetOf, SupersetOf};
