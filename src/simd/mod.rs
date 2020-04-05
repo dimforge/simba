@@ -1,21 +1,25 @@
-//! Traits for SIMD types (also implemented by scalar types).
+//! Traits implemented by SIMD types and non-SIMD types.
 
+#[cfg(feature = "packed_simd")]
+pub use self::packed_simd_impl::*;
 pub use self::simd_bool::SimdBool;
 pub use self::simd_complex::SimdComplexField;
-#[cfg(feature = "simd")]
-pub use self::simd_impl::*;
 pub use self::simd_option::SimdOption;
 pub use self::simd_partial_ord::SimdPartialOrd;
 pub use self::simd_real::SimdRealField;
 pub use self::simd_signed::SimdSigned;
 pub use self::simd_value::{PrimitiveSimdValue, SimdValue};
+#[cfg(feature = "wide")]
+pub use self::wide_simd_impl::{WideBoolF32x4, WideF32x4};
 
+#[cfg(feature = "packed_simd")]
+mod packed_simd_impl;
 mod simd_bool;
 mod simd_complex;
-#[cfg(feature = "simd")]
-mod simd_impl;
 mod simd_option;
 mod simd_partial_ord;
 mod simd_real;
 mod simd_signed;
 mod simd_value;
+#[cfg(feature = "wide")]
+mod wide_simd_impl;
