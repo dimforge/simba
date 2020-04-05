@@ -21,4 +21,4 @@ decimal     = { version = "2.0", default-features = false, optional = true }
 num-complex = { version = "0.2", default-features = false }
 packed_simd = { version = "0.3", optional = true }
 wide        = { version = "", optional = true }
-paste = "0.1"
+paste       = "0.1"
