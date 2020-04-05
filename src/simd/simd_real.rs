@@ -1,7 +1,10 @@
 use crate::scalar::RealField;
 use crate::simd::{SimdComplexField, SimdPartialOrd, SimdSigned};
 
-/// Trait shared by all SIMD reals.
+/// Lanewise generalization of `RealField` for SIMD reals.
+///
+/// Each lane of an SIMD real field should contain one real field.
+/// This is implemented by scalar reals like `f32` and `f64` as well as SIMD reals like `packed_simd::f32x4`.
 #[allow(missing_docs)]
 pub trait SimdRealField:
     SimdPartialOrd + SimdSigned + SimdComplexField<SimdRealField = Self>

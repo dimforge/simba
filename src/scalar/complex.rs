@@ -62,7 +62,6 @@ macro_rules! complex_trait_methods(
                 self.[<$($prefix)* to_exp>]().1
             }
 
-
             fn [<$($prefix)* floor>](self) -> Self;
             fn [<$($prefix)* ceil>](self) -> Self;
             fn [<$($prefix)* round>](self) -> Self;

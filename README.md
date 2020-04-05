@@ -1,9 +1,6 @@
 # Simba - SIMD algebra for Rust
 
 <p align="center">
-  <img src="https://simba.org/img/logo_simba.svg" alt="crates.io">
-</p>
-<p align="center">
     <a href="https://discord.gg/vt9DJSW">
         <img src="https://img.shields.io/discord/507548572338880513.svg?logo=discord&colorB=7289DA">
     </a>
@@ -19,7 +16,7 @@
 </p>
 <p align = "center">
     <strong>
-        <a href="https://simba.org">Users guide</a> | <a href="https://simba.org/rustdoc/simba/index.html">Documentation</a> | <a href="https://discourse.nphysics.org/c/simba">Forum</a>
+        <a href="https://docs.rs/simba">Documentation</a> | <a href="https://discourse.nphysics.org/c/simba">Forum</a>
     </strong>
 </p>
 

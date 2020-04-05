@@ -1,3 +1,5 @@
+//! Traits implemented by scalar, non-SIMD, types.
+
 pub use self::complex::ComplexField;
 pub use self::field::{ClosedAdd, ClosedDiv, ClosedMul, ClosedNeg, ClosedSub, Field};
 pub use self::real::RealField;

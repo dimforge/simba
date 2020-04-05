@@ -7,7 +7,9 @@ use std::ops::Neg;
 use crate::scalar::{ComplexField, Field, SubsetOf, SupersetOf};
 use crate::simd::{SimdRealField, SimdValue};
 
-/// Trait shared by all SIMD complex fields and its subfields (like real numbers).
+/// Lane-wise generalisation of `ComplexField` for SIMD complex fields.
+///
+/// Each lane of an SIMD complex field should contain one complex field.
 #[allow(missing_docs)]
 pub trait SimdComplexField:
     SubsetOf<Self>

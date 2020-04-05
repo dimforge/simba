@@ -1,20 +1,40 @@
 use crate::simd::SimdBool;
 
-/// Trait implemented by Simd types as well as scalar types (f32, u32, etc.).
+/// Base trait for every SIMD types.
 pub trait SimdValue: Sized {
     /// The type of the elements of each lane of this SIMD value.
     type Element: SimdValue<Element = Self::Element, SimdBool = bool>;
+    /// Type of the result of comparing two SIMD values like `self`.
     type SimdBool: SimdBool;
 
+    /// The number of lanes of this SIMD value.
     fn lanes() -> usize;
+    /// Initializes an SIMD value with each lanes set to `val`.
     fn splat(val: Self::Element) -> Self;
+    /// Extracts the i-th lane of `self`.
+    ///
+    /// Panics if `i >= Self::lanes()`.
     fn extract(&self, i: usize) -> Self::Element;
+    /// Extracts the i-th lane of `self` without bound-checking.
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element;
+    /// Replaces the i-th lane of `self` by `val`.
+    ///
+    /// Panics if `i >= Self::lanes()`.
     fn replace(&mut self, i: usize, val: Self::Element);
+    /// Replaces the i-th lane of `self` by `val` without bound-checking.
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element);
 
+    /// Merges `self` and `other` depending on the lanes of `cond`.
+    ///
+    /// For each lane of `cond` with bits set to 1, the result's will contain the value of the lane of `self`.
+    /// For each lane of `cond` with bits set to 0, the result's will contain the value of the lane of `other`.
     fn select(self, cond: Self::SimdBool, other: Self) -> Self;
 
+    /// Applies a function to each lane of `self`.
+    ///
+    /// Note that, while convenient, this method can be extremely slow as this
+    /// requires to extract each lane of `self` and then combine them again into
+    /// a new SIMD value.
     #[inline(always)]
     fn map_lanes(self, f: impl Fn(Self::Element) -> Self::Element) -> Self
     where
@@ -29,6 +49,11 @@ pub trait SimdValue: Sized {
         result
     }
 
+    /// Applies a function to each lane of `self` paired with the corresponding lane of `b`.
+    ///
+    /// Note that, while convenient, this method can be extremely slow as this
+    /// requires to extract each lane of `self` and then combine them again into
+    /// a new SIMD value.
     #[inline(always)]
     fn zip_map_lanes(
         self,
@@ -52,10 +77,12 @@ pub trait SimdValue: Sized {
     }
 }
 
-/// Marker trait which is only implemented by numeric primitive types.
+/// Marker trait implemented by SIMD and non-SIMD primitive numeric values.
 ///
-/// Are primitives types all unsigned integer, integer, float, and complex types, as
-/// well as their SIMD variants.
+/// This trait is useful for some disambiguations when writing blanked impls.
+/// This is implemented by all unsigned integer, integer, float, and complex types, as
+/// with only one lane, i.e., `f32`, `f64`, `u32`, `i64`, etc. as well as SIMD types like
+/// `f32x4, i32x8`, etc..
 pub trait PrimitiveSimdValue: Copy + SimdValue {}
 
 impl<N: SimdValue> SimdValue for num_complex::Complex<N> {
