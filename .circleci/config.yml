@@ -1,0 +1,58 @@
+version: 2.1
+
+executors:
+  rust-nightly-executor:
+    docker:
+        - image: rustlang/rust:nightly
+  rust-executor:
+    docker:
+        - image: rust:latest
+
+
+jobs:
+  check-fmt:
+    executor: rust-executor
+    steps:
+      - checkout
+      - run:
+          name: install rustfmt
+          command: rustup component add rustfmt
+      - run:
+          name: check formatting
+          command: cargo fmt -- --check
+  build-native:
+    executor: rust-executor
+    steps:
+      - checkout
+      - run:
+          name: build --no-default-feature
+          command: cargo build --no-default-features;
+      - run:
+          name: build (default features)
+          command: cargo build;
+      - run:
+          name: build --features wide
+          command: cargo build --features wide
+  build-nightly:
+    executor: rust-nightly-executor
+    steps:
+      - checkout
+      - run:
+          name: build --features packed_simd
+          command: cargo build --features packed_simd
+
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - check-fmt
+      - build-native:
+          requires:
+            - check-fmt
+      - build-wasm:
+          requires:
+            - check-fmt
+      - build-nightly:
+          requires:
+            - check-fmt
