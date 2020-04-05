@@ -50,9 +50,6 @@ workflows:
       - build-native:
           requires:
             - check-fmt
-      - build-wasm:
-          requires:
-            - check-fmt
       - build-nightly:
           requires:
             - check-fmt
