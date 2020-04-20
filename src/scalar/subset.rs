@@ -45,8 +45,8 @@ pub trait SubsetOf<T>: Sized {
 }
 
 /// Nested sets and conversions between them. Useful to work with substructures. It is preferable
-/// to implement the `SupersetOf` trait instead of `SubsetOf` whenever possible (because
-/// `SupersetOf` is automatically implemented whenever `SubsetOf` is.
+/// to implement the `SubsetOf` trait instead of `SupersetOf` whenever possible (because
+/// `SupersetOf` is automatically implemented whenever `SubsetOf` is).
 ///
 /// The notion of "nested sets" is very broad and applies to what the types are _supposed to
 /// represent_, independently from their actual implementation details and limitations. For
