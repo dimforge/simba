@@ -1,7 +1,10 @@
 //! Implementation of traits form fixed-point numbers.
 use crate::scalar::{ComplexField, Field, RealField, SubsetOf, SupersetOf};
 use crate::simd::{PrimitiveSimdValue, SimdValue};
-use fixed::types::extra::{LeEqU128, LeEqU16, LeEqU32, LeEqU64, LeEqU8};
+use fixed::types::extra::{
+    IsLessOrEqual, LeEqU128, LeEqU16, LeEqU32, LeEqU64, LeEqU8, True, Unsigned, U13, U14, U16, U29,
+    U30, U32, U5, U6, U61, U62, U64, U8,
+};
 use num::{Bounded, FromPrimitive, Num, One, Signed, Zero};
 use std::cmp::Ordering;
 use std::ops::{
@@ -9,7 +12,7 @@ use std::ops::{
 };
 
 macro_rules! impl_fixed_type(
-    ($($FixedI: ident, $LeEqDim: ident;)*) => {$(
+    ($($FixedI: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident;)*) => {$(
         #[derive(Copy, Clone)]
         /// Signed fixed-point number with a generic number of bits for the fractional part.
         pub struct $FixedI<Fract: $LeEqDim>(pub fixed::$FixedI<Fract>);
@@ -367,17 +370,19 @@ macro_rules! impl_fixed_type(
             }
 
             fn is_positive(&self) -> bool {
-                println!("XXX Invalid fixed-point is_positive implementation.");
-                self.0.to_num::<f64>().is_positive()
+                self.0 >= Self::zero().0
             }
 
             fn is_negative(&self) -> bool {
-                println!("XXX Invalid fixed-point is_negative implementation.");
-                self.0.to_num::<f64>().is_negative()
+                self.0 <= Self::zero().0
             }
         }
 
-        impl<Fract: $LeEqDim + Send + Sync + 'static> ComplexField for $FixedI<Fract> {
+        impl<Fract: Send + Sync + 'static> ComplexField for $FixedI<Fract>
+            where Fract: Unsigned
+                    + IsLessOrEqual<$LeEqDim1, Output = True>
+                    + IsLessOrEqual<$LeEqDim2, Output = True>
+                    + IsLessOrEqual<$LeEqDim3, Output = True> {
             type RealField = Self;
 
             #[inline]
@@ -512,8 +517,7 @@ macro_rules! impl_fixed_type(
 
             #[inline]
             fn sqrt(self) -> Self {
-                println!("XXX Invalid fixed-point sqrt implementation.");
-                self.0.to_num::<f64>().sqrt().to_superset()
+                Self(fixed_trig::cordic::sqrt(self.0, 64)) // FIXME: let the user choose the number of iterations somehow.
             }
 
             #[inline]
@@ -578,40 +582,38 @@ macro_rules! impl_fixed_type(
 
             #[inline]
             fn sin(self) -> Self {
-                println!("XXX Invalid fixed-point sin implementation.");
-                self.0.to_num::<f64>().sin().to_superset()
+                Self(fixed_trig::cordic::sin(self.0))
             }
 
             #[inline]
             fn cos(self) -> Self {
-                println!("XXX Invalid fixed-point cos implementation.");
-                self.0.to_num::<f64>().cos().to_superset()
+                Self(fixed_trig::cordic::cos(self.0))
             }
 
             #[inline]
             fn tan(self) -> Self {
-                unimplemented!()
+                Self(fixed_trig::cordic::tan(self.0))
             }
 
             #[inline]
             fn asin(self) -> Self {
-                unimplemented!()
+                Self(fixed_trig::cordic::asin(self.0))
             }
 
             #[inline]
             fn acos(self) -> Self {
-                println!("XXX Invalid fixed-point acos implementation.");
-                self.0.to_num::<f64>().acos().to_superset()
+                Self(fixed_trig::cordic::acos(self.0))
             }
 
             #[inline]
             fn atan(self) -> Self {
-                unimplemented!()
+                Self(fixed_trig::cordic::atan(self.0))
             }
 
             #[inline]
             fn sin_cos(self) -> (Self, Self) {
-                (self.sin(), self.cos())
+                let (sin, cos) = fixed_trig::cordic::sin_cos(self.0);
+                (Self(sin), Self(cos))
             }
 
             #[inline]
@@ -650,7 +652,11 @@ macro_rules! impl_fixed_type(
             }
         }
 
-        impl<Fract: $LeEqDim + Send + Sync + 'static> RealField for $FixedI<Fract> {
+        impl<Fract: Send + Sync + 'static> RealField for $FixedI<Fract>
+            where Fract: Unsigned
+                    + IsLessOrEqual<$LeEqDim1, Output = True>
+                    + IsLessOrEqual<$LeEqDim2, Output = True>
+                    + IsLessOrEqual<$LeEqDim3, Output = True> {
             #[inline]
             fn is_sign_positive(self) -> bool {
                 unimplemented!()
@@ -692,15 +698,13 @@ macro_rules! impl_fixed_type(
 
             #[inline]
             fn atan2(self, other: Self) -> Self {
-                println!("XXX Invalid fixed-point atan2 implementation.");
-                self.0.to_num::<f64>().atan2(other.0.to_num::<f64>()).to_superset()
+                Self(fixed_trig::cordic::atan2(self.0, other.0))
             }
 
             /// Archimedes' constant.
             #[inline]
             fn pi() -> Self {
-                println!("XXX Invalid fixed-point pi implementation.");
-                f64::pi().to_superset()
+                Self(fixed::$FixedI::PI)
             }
 
             /// 2.0 * pi.
@@ -712,13 +716,13 @@ macro_rules! impl_fixed_type(
             /// pi / 2.0.
             #[inline]
             fn frac_pi_2() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::FRAC_PI_2)
             }
 
             /// pi / 3.0.
             #[inline]
             fn frac_pi_3() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::FRAC_PI_3)
             }
 
             /// pi / 4.0.
@@ -736,13 +740,13 @@ macro_rules! impl_fixed_type(
             /// pi / 8.0.
             #[inline]
             fn frac_pi_8() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::FRAC_PI_8)
             }
 
             /// 1.0 / pi.
             #[inline]
             fn frac_1_pi() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::FRAC_1_PI)
             }
 
             /// 2.0 / pi.
@@ -791,9 +795,8 @@ macro_rules! impl_fixed_type(
 );
 
 impl_fixed_type!(
-    FixedI8, LeEqU8;
-    FixedI16, LeEqU16;
-    FixedI32, LeEqU32;
-    FixedI64, LeEqU64;
-    FixedI128, LeEqU128;
+    FixedI8, LeEqU8, U8, U6, U5;
+    FixedI16, LeEqU16, U16, U14, U13;
+    FixedI32, LeEqU32, U32, U30, U29;
+    FixedI64, LeEqU64, U64, U62, U61;
 );
