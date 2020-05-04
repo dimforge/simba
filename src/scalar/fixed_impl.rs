@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 //! Implementation of traits form fixed-point numbers.
 use crate::scalar::{ComplexField, Field, RealField, SubsetOf, SupersetOf};
 use crate::simd::{PrimitiveSimdValue, SimdValue};
@@ -800,3 +802,5 @@ impl_fixed_type!(
     FixedI32, LeEqU32, U32, U30, U29;
     FixedI64, LeEqU64, U64, U62, U61;
 );
+
+pub type FixedI16F16 = FixedI32<fixed::types::extra::U16>;
