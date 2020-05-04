@@ -804,3 +804,6 @@ impl_fixed_type!(
 );
 
 pub type FixedI16F16 = FixedI32<fixed::types::extra::U16>;
+pub type FixedI32F32 = FixedI64<fixed::types::extra::U32>;
+pub type FixedI40F24 = FixedI64<fixed::types::extra::U24>;
+pub type FixedI48F16 = FixedI64<fixed::types::extra::U16>;
