@@ -14,7 +14,7 @@ use std::ops::{
 };
 
 macro_rules! impl_fixed_type(
-    ($($FixedI: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident;)*) => {$(
+    ($($FixedI: ident, $Int: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident;)*) => {$(
         #[derive(Copy, Clone)]
         /// Signed fixed-point number with a generic number of bits for the fractional part.
         pub struct $FixedI<Fract: $LeEqDim>(pub fixed::$FixedI<Fract>);
@@ -290,8 +290,24 @@ macro_rules! impl_fixed_type(
             }
 
             fn ulps_eq(&self, other: &Self, epsilon: Self::Epsilon, max_ulps: u32) -> bool {
-                println!("XXX Invalid fixed-point ulps_eq implementation.");
-                self.0.to_num::<f64>().ulps_eq(&other.0.to_num::<f64>(), epsilon.0.to_num::<f64>(), max_ulps)
+                use approx::AbsDiffEq;
+
+                if self.abs_diff_eq(other, epsilon) {
+                    return true;
+                }
+
+                if self.signum() != other.signum() {
+                    return false;
+                }
+
+                let bits1 = self.0.to_bits();
+                let bits2 = other.0.to_bits();
+
+                if bits1 > bits2 {
+                    (bits1 - bits2) <= max_ulps as $Int
+                } else {
+                    (bits2 - bits1) <= max_ulps as $Int
+                }
             }
         }
 
@@ -533,8 +549,7 @@ macro_rules! impl_fixed_type(
 
             #[inline]
             fn exp(self) -> Self {
-                println!("XXX Invalid fixed-point exp implementation.");
-                self.0.to_num::<f64>().exp().to_superset()
+                Self(fixed_trig::cordic::exp(self.0))
             }
 
             #[inline]
@@ -797,12 +812,13 @@ macro_rules! impl_fixed_type(
 );
 
 impl_fixed_type!(
-    FixedI8, LeEqU8, U8, U6, U5;
-    FixedI16, LeEqU16, U16, U14, U13;
-    FixedI32, LeEqU32, U32, U30, U29;
-    FixedI64, LeEqU64, U64, U62, U61;
+    FixedI8, i8, LeEqU8, U8, U6, U5;
+    FixedI16, i16, LeEqU16, U16, U14, U13;
+    FixedI32, i32, LeEqU32, U32, U30, U29;
+    FixedI64, i64, LeEqU64, U64, U62, U61;
 );
 
+pub type FixedI8F24 = FixedI32<fixed::types::extra::U24>;
 pub type FixedI16F16 = FixedI32<fixed::types::extra::U16>;
 pub type FixedI32F32 = FixedI64<fixed::types::extra::U32>;
 pub type FixedI40F24 = FixedI64<fixed::types::extra::U24>;
