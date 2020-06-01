@@ -1,11 +1,11 @@
 #![allow(missing_docs)]
 
 //! Implementation of traits form fixed-point numbers.
-use crate::scalar::{ComplexField, Field, RealField, SubsetOf, SupersetOf};
+use crate::scalar::{ComplexField, Field, RealField, SubsetOf};
 use crate::simd::{PrimitiveSimdValue, SimdValue};
 use fixed::types::extra::{
-    IsLessOrEqual, LeEqU128, LeEqU16, LeEqU32, LeEqU64, LeEqU8, True, Unsigned, U13, U14, U16, U29,
-    U30, U32, U5, U6, U61, U62, U64, U8,
+    IsLessOrEqual, LeEqU16, LeEqU32, LeEqU64, LeEqU8, True, Unsigned, U13, U14, U16, U29, U30, U32,
+    U5, U6, U61, U62, U64, U8,
 };
 use num::{Bounded, FromPrimitive, Num, One, Signed, Zero};
 use std::cmp::Ordering;
@@ -32,6 +32,24 @@ macro_rules! impl_fixed_type(
             #[inline(always)]
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                 self.0.partial_cmp(&other.0)
+            }
+        }
+
+        #[cfg(feature = "rand")]
+        impl<Fract: $LeEqDim> rand::distributions::Distribution<$FixedI<Fract>> for rand::distributions::Standard {
+            #[inline]
+            fn sample<'a, G: rand::Rng + ?Sized>(&self, rng: &mut G) -> $FixedI<Fract> {
+                let bits = rng.gen();
+                $FixedI(fixed::$FixedI::from_bits(bits))
+            }
+        }
+
+        #[cfg(feature = "rand")]
+        impl<Fract: $LeEqDim> rand::distributions::Distribution<$FixedI<Fract>> for rand::distributions::OpenClosed01 {
+            #[inline]
+            fn sample<'a, G: rand::Rng + ?Sized>(&self, rng: &mut G) -> $FixedI<Fract> {
+                let val: f64 = rng.gen();
+                $FixedI(fixed::$FixedI::from_num(val))
             }
         }
 
@@ -336,40 +354,40 @@ macro_rules! impl_fixed_type(
         }
 
         impl<Fract: $LeEqDim> FromPrimitive for $FixedI<Fract> {
-            fn from_i64(n: i64) -> Option<Self> {
+            fn from_i64(_n: i64) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_u64(n: u64) -> Option<Self> {
+            fn from_u64(_n: u64) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_isize(n: isize) -> Option<Self> {
+            fn from_isize(_n: isize) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_i8(n: i8) -> Option<Self> {
+            fn from_i8(_n: i8) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_i16(n: i16) -> Option<Self> {
+            fn from_i16(_n: i16) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_i32(n: i32) -> Option<Self> {
+            fn from_i32(_n: i32) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_usize(n: usize) -> Option<Self> {
+            fn from_usize(_n: usize) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_u8(n: u8) -> Option<Self> {
+            fn from_u8(_n: u8) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_u16(n: u16) -> Option<Self> {
+            fn from_u16(_n: u16) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_u32(n: u32) -> Option<Self> {
+            fn from_u32(_n: u32) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_f32(n: f32) -> Option<Self> {
+            fn from_f32(_n: f32) -> Option<Self> {
                 unimplemented!()
             }
-            fn from_f64(n: f64) -> Option<Self> {
+            fn from_f64(_n: f64) -> Option<Self> {
                 unimplemented!()
             }
         }
@@ -380,7 +398,7 @@ macro_rules! impl_fixed_type(
             }
 
             fn abs_sub(&self, other: &Self) -> Self {
-                unimplemented!()
+                self.abs() - *other
             }
 
             fn signum(&self) -> Self {
@@ -513,7 +531,7 @@ macro_rules! impl_fixed_type(
 
             #[cfg(feature = "std")]
             #[inline]
-            fn powi(self, n: i32) -> Self {
+            fn powi(self, _n: i32) -> Self {
                 unimplemented!()
             }
 
@@ -524,18 +542,18 @@ macro_rules! impl_fixed_type(
             }
 
             #[inline]
-            fn powf(self, n: Self) -> Self {
+            fn powf(self, _n: Self) -> Self {
                 unimplemented!()
             }
 
             #[inline]
-            fn powc(self, n: Self) -> Self {
+            fn powc(self, _n: Self) -> Self {
                 unimplemented!()
             }
 
             #[inline]
             fn sqrt(self) -> Self {
-                Self(fixed_trig::cordic::sqrt(self.0, 64)) // FIXME: let the user choose the number of iterations somehow.
+                Self(cordic::sqrt(self.0))
             }
 
             #[inline]
@@ -549,7 +567,7 @@ macro_rules! impl_fixed_type(
 
             #[inline]
             fn exp(self) -> Self {
-                Self(fixed_trig::cordic::exp(self.0))
+                Self(cordic::exp(self.0))
             }
 
             #[inline]
@@ -573,7 +591,7 @@ macro_rules! impl_fixed_type(
             }
 
             #[inline]
-            fn log(self, base: Self) -> Self {
+            fn log(self, _base: Self) -> Self {
                 unimplemented!()
             }
 
@@ -593,43 +611,43 @@ macro_rules! impl_fixed_type(
             }
 
             #[inline]
-            fn hypot(self, other: Self) -> Self::RealField {
+            fn hypot(self, _other: Self) -> Self::RealField {
                 unimplemented!()
             }
 
             #[inline]
             fn sin(self) -> Self {
-                Self(fixed_trig::cordic::sin(self.0))
+                Self(cordic::sin(self.0))
             }
 
             #[inline]
             fn cos(self) -> Self {
-                Self(fixed_trig::cordic::cos(self.0))
+                Self(cordic::cos(self.0))
             }
 
             #[inline]
             fn tan(self) -> Self {
-                Self(fixed_trig::cordic::tan(self.0))
+                Self(cordic::tan(self.0))
             }
 
             #[inline]
             fn asin(self) -> Self {
-                Self(fixed_trig::cordic::asin(self.0))
+                Self(cordic::asin(self.0))
             }
 
             #[inline]
             fn acos(self) -> Self {
-                Self(fixed_trig::cordic::acos(self.0))
+                Self(cordic::acos(self.0))
             }
 
             #[inline]
             fn atan(self) -> Self {
-                Self(fixed_trig::cordic::atan(self.0))
+                Self(cordic::atan(self.0))
             }
 
             #[inline]
             fn sin_cos(self) -> (Self, Self) {
-                let (sin, cos) = fixed_trig::cordic::sin_cos(self.0);
+                let (sin, cos) = cordic::sin_cos(self.0);
                 (Self(sin), Self(cos))
             }
 
@@ -715,7 +733,7 @@ macro_rules! impl_fixed_type(
 
             #[inline]
             fn atan2(self, other: Self) -> Self {
-                Self(fixed_trig::cordic::atan2(self.0, other.0))
+                Self(cordic::atan2(self.0, other.0))
             }
 
             /// Archimedes' constant.
@@ -727,7 +745,7 @@ macro_rules! impl_fixed_type(
             /// 2.0 * pi.
             #[inline]
             fn two_pi() -> Self {
-                unimplemented!()
+                Self::pi() + Self::pi()
             }
 
             /// pi / 2.0.
@@ -818,8 +836,117 @@ impl_fixed_type!(
     FixedI64, i64, LeEqU64, U64, U62, U61;
 );
 
-pub type FixedI8F24 = FixedI32<fixed::types::extra::U24>;
+pub type FixedI8F0 = FixedI8<fixed::types::extra::U0>;
+pub type FixedI7F1 = FixedI8<fixed::types::extra::U1>;
+pub type FixedI6F2 = FixedI8<fixed::types::extra::U2>;
+pub type FixedI5F3 = FixedI8<fixed::types::extra::U3>;
+pub type FixedI4F4 = FixedI8<fixed::types::extra::U4>;
+pub type FixedI3F5 = FixedI8<fixed::types::extra::U5>;
+
+pub type FixedI16F0 = FixedI16<fixed::types::extra::U0>;
+pub type FixedI15F1 = FixedI16<fixed::types::extra::U1>;
+pub type FixedI14F2 = FixedI16<fixed::types::extra::U2>;
+pub type FixedI13F3 = FixedI16<fixed::types::extra::U3>;
+pub type FixedI12F4 = FixedI16<fixed::types::extra::U4>;
+pub type FixedI11F5 = FixedI16<fixed::types::extra::U5>;
+pub type FixedI10F6 = FixedI16<fixed::types::extra::U6>;
+pub type FixedI9F7 = FixedI16<fixed::types::extra::U7>;
+pub type FixedI8F8 = FixedI16<fixed::types::extra::U8>;
+pub type FixedI7F9 = FixedI16<fixed::types::extra::U9>;
+pub type FixedI6F10 = FixedI16<fixed::types::extra::U10>;
+pub type FixedI5F11 = FixedI16<fixed::types::extra::U11>;
+pub type FixedI4F12 = FixedI16<fixed::types::extra::U12>;
+pub type FixedI3F13 = FixedI16<fixed::types::extra::U13>;
+
+pub type FixedI32F0 = FixedI32<fixed::types::extra::U0>;
+pub type FixedI31F1 = FixedI32<fixed::types::extra::U1>;
+pub type FixedI30F2 = FixedI32<fixed::types::extra::U2>;
+pub type FixedI29F3 = FixedI32<fixed::types::extra::U3>;
+pub type FixedI28F4 = FixedI32<fixed::types::extra::U4>;
+pub type FixedI27F5 = FixedI32<fixed::types::extra::U5>;
+pub type FixedI26F6 = FixedI32<fixed::types::extra::U6>;
+pub type FixedI25F7 = FixedI32<fixed::types::extra::U7>;
+pub type FixedI24F8 = FixedI32<fixed::types::extra::U8>;
+pub type FixedI23F9 = FixedI32<fixed::types::extra::U9>;
+pub type FixedI22F10 = FixedI32<fixed::types::extra::U10>;
+pub type FixedI21F11 = FixedI32<fixed::types::extra::U11>;
+pub type FixedI20F12 = FixedI32<fixed::types::extra::U12>;
+pub type FixedI19F13 = FixedI32<fixed::types::extra::U13>;
+pub type FixedI18F14 = FixedI32<fixed::types::extra::U14>;
+pub type FixedI17F15 = FixedI32<fixed::types::extra::U15>;
 pub type FixedI16F16 = FixedI32<fixed::types::extra::U16>;
-pub type FixedI32F32 = FixedI64<fixed::types::extra::U32>;
-pub type FixedI40F24 = FixedI64<fixed::types::extra::U24>;
+pub type FixedI15F17 = FixedI32<fixed::types::extra::U17>;
+pub type FixedI14F18 = FixedI32<fixed::types::extra::U18>;
+pub type FixedI13F19 = FixedI32<fixed::types::extra::U19>;
+pub type FixedI12F20 = FixedI32<fixed::types::extra::U20>;
+pub type FixedI11F21 = FixedI32<fixed::types::extra::U21>;
+pub type FixedI10F22 = FixedI32<fixed::types::extra::U22>;
+pub type FixedI9F23 = FixedI32<fixed::types::extra::U23>;
+pub type FixedI8F24 = FixedI32<fixed::types::extra::U24>;
+pub type FixedI7F25 = FixedI32<fixed::types::extra::U25>;
+pub type FixedI6F26 = FixedI32<fixed::types::extra::U26>;
+pub type FixedI5F27 = FixedI32<fixed::types::extra::U27>;
+pub type FixedI4F28 = FixedI32<fixed::types::extra::U28>;
+pub type FixedI3F29 = FixedI32<fixed::types::extra::U29>;
+
+pub type FixedI64F0 = FixedI64<fixed::types::extra::U0>;
+pub type FixedI63F1 = FixedI64<fixed::types::extra::U1>;
+pub type FixedI62F2 = FixedI64<fixed::types::extra::U2>;
+pub type FixedI61F3 = FixedI64<fixed::types::extra::U3>;
+pub type FixedI60F4 = FixedI64<fixed::types::extra::U4>;
+pub type FixedI59F5 = FixedI64<fixed::types::extra::U5>;
+pub type FixedI58F6 = FixedI64<fixed::types::extra::U6>;
+pub type FixedI57F7 = FixedI64<fixed::types::extra::U7>;
+pub type FixedI56F8 = FixedI64<fixed::types::extra::U8>;
+pub type FixedI55F9 = FixedI64<fixed::types::extra::U9>;
+pub type FixedI54F10 = FixedI64<fixed::types::extra::U10>;
+pub type FixedI53F11 = FixedI64<fixed::types::extra::U11>;
+pub type FixedI52F12 = FixedI64<fixed::types::extra::U12>;
+pub type FixedI51F13 = FixedI64<fixed::types::extra::U13>;
+pub type FixedI50F14 = FixedI64<fixed::types::extra::U14>;
+pub type FixedI49F15 = FixedI64<fixed::types::extra::U15>;
 pub type FixedI48F16 = FixedI64<fixed::types::extra::U16>;
+pub type FixedI47F17 = FixedI64<fixed::types::extra::U17>;
+pub type FixedI46F18 = FixedI64<fixed::types::extra::U18>;
+pub type FixedI45F19 = FixedI64<fixed::types::extra::U19>;
+pub type FixedI44F20 = FixedI64<fixed::types::extra::U20>;
+pub type FixedI43F21 = FixedI64<fixed::types::extra::U21>;
+pub type FixedI42F22 = FixedI64<fixed::types::extra::U22>;
+pub type FixedI41F23 = FixedI64<fixed::types::extra::U23>;
+pub type FixedI40F24 = FixedI64<fixed::types::extra::U24>;
+pub type FixedI39F25 = FixedI64<fixed::types::extra::U25>;
+pub type FixedI38F26 = FixedI64<fixed::types::extra::U26>;
+pub type FixedI37F27 = FixedI64<fixed::types::extra::U27>;
+pub type FixedI36F28 = FixedI64<fixed::types::extra::U28>;
+pub type FixedI35F29 = FixedI64<fixed::types::extra::U29>;
+pub type FixedI34F30 = FixedI64<fixed::types::extra::U30>;
+pub type FixedI33F31 = FixedI64<fixed::types::extra::U31>;
+pub type FixedI32F32 = FixedI64<fixed::types::extra::U32>;
+pub type FixedI31F33 = FixedI64<fixed::types::extra::U33>;
+pub type FixedI30F34 = FixedI64<fixed::types::extra::U34>;
+pub type FixedI29F35 = FixedI64<fixed::types::extra::U35>;
+pub type FixedI28F36 = FixedI64<fixed::types::extra::U36>;
+pub type FixedI27F37 = FixedI64<fixed::types::extra::U37>;
+pub type FixedI26F38 = FixedI64<fixed::types::extra::U38>;
+pub type FixedI25F39 = FixedI64<fixed::types::extra::U39>;
+pub type FixedI24F40 = FixedI64<fixed::types::extra::U40>;
+pub type FixedI23F41 = FixedI64<fixed::types::extra::U41>;
+pub type FixedI22F42 = FixedI64<fixed::types::extra::U42>;
+pub type FixedI21F43 = FixedI64<fixed::types::extra::U43>;
+pub type FixedI20F44 = FixedI64<fixed::types::extra::U44>;
+pub type FixedI19F45 = FixedI64<fixed::types::extra::U45>;
+pub type FixedI18F46 = FixedI64<fixed::types::extra::U46>;
+pub type FixedI17F47 = FixedI64<fixed::types::extra::U47>;
+pub type FixedI16F48 = FixedI64<fixed::types::extra::U48>;
+pub type FixedI15F49 = FixedI64<fixed::types::extra::U49>;
+pub type FixedI14F50 = FixedI64<fixed::types::extra::U50>;
+pub type FixedI13F51 = FixedI64<fixed::types::extra::U51>;
+pub type FixedI12F52 = FixedI64<fixed::types::extra::U52>;
+pub type FixedI11F53 = FixedI64<fixed::types::extra::U53>;
+pub type FixedI10F54 = FixedI64<fixed::types::extra::U54>;
+pub type FixedI9F55 = FixedI64<fixed::types::extra::U55>;
+pub type FixedI8F56 = FixedI64<fixed::types::extra::U56>;
+pub type FixedI7F57 = FixedI64<fixed::types::extra::U57>;
+pub type FixedI6F58 = FixedI64<fixed::types::extra::U58>;
+pub type FixedI5F59 = FixedI64<fixed::types::extra::U59>;
+pub type FixedI4F60 = FixedI64<fixed::types::extra::U60>;
