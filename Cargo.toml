@@ -1,6 +1,6 @@
 [package]
 name = "simba"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["sebcrozet <developer@crozet.re>"]
 description = "SIMD algebra for Rust"
 keywords = ["algebra", "simd", "math"]
