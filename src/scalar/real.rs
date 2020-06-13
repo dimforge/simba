@@ -24,6 +24,11 @@ pub trait RealField:
     fn is_sign_positive(self) -> bool;
     /// Is the sign of this real number negative?
     fn is_sign_negative(self) -> bool;
+    /// Copies the sign of `self` to `to`.
+    ///
+    /// - Returns `to.simd_abs()` if `self` is positive or positive-zero.
+    /// - Returns `-to.simd_abs()` if `self` is negative or negative-zero.
+    fn copysign(self, to: Self) -> Self;
 
     fn max(self, other: Self) -> Self;
     fn min(self, other: Self) -> Self;
@@ -59,6 +64,12 @@ macro_rules! impl_real(
             #[inline]
             fn is_sign_negative(self) -> bool {
                 $M::is_sign_negative(self)
+            }
+
+            #[inline(always)]
+            fn copysign(self, to: Self) -> Self {
+                let signbit = (-0.0 as $T).to_bits();
+                Self::from_bits((signbit & self.to_bits()) | ((!signbit) & to.to_bits()))
             }
 
             #[inline]

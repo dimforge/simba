@@ -25,8 +25,7 @@ use std::{
 pub struct Simd<N: SimdValue>(pub N);
 
 impl<N: SimdValue + Copy> fmt::Display for Simd<N>
-where
-    N::Element: fmt::Display,
+where N::Element: fmt::Display
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if N::lanes() == 1 {
@@ -525,7 +524,7 @@ macro_rules! impl_int_simd(
 );
 
 macro_rules! impl_float_simd(
-    ($($t: ty, $elt: ty, $bool: ty;)*) => ($(
+    ($($t: ty, $elt: ty, $int: ty, $bool: ty;)*) => ($(
         impl_int_simd!($t, $elt, $bool;);
 
         // FIXME: this should be part of impl_int_simd
@@ -569,6 +568,17 @@ macro_rules! impl_float_simd(
             #[inline(always)]
             fn simd_atan2(self, other: Self) -> Self {
                 self.zip_map_lanes(other, |a, b| a.atan2(b))
+            }
+
+            #[inline(always)]
+            fn simd_copysign(self, to: Self) -> Self {
+                use packed_simd::FromBits;
+                let sign_bits = <$int>::from_bits(<$t>::splat(-0.0));
+                let self_bits = <$int>::from_bits(self.0);
+                let to_bits = <$int>::from_bits(to.0);
+                let result =
+                    <$t>::from_bits((sign_bits & self_bits) | ((!sign_bits) & to_bits));
+                Simd(result)
             }
 
             #[inline(always)]
@@ -1333,13 +1343,13 @@ fn simd_complex_from_polar<N: SimdRealField>(r: N, theta: N) -> num_complex::Com
 }
 
 impl_float_simd!(
-    packed_simd::f32x2, f32, m32x2;
-    packed_simd::f32x4, f32, m32x4;
-    packed_simd::f32x8, f32, m32x8;
-    packed_simd::f32x16, f32, m32x16;
-    packed_simd::f64x2, f64, m64x2;
-    packed_simd::f64x4, f64, m64x4;
-    packed_simd::f64x8, f64, m64x8;
+    packed_simd::f32x2, f32, packed_simd::i32x2, m32x2;
+    packed_simd::f32x4, f32, packed_simd::i32x4, m32x4;
+    packed_simd::f32x8, f32, packed_simd::i32x8, m32x8;
+    packed_simd::f32x16, f32, packed_simd::i32x16, m32x16;
+    packed_simd::f64x2, f64, packed_simd::i64x2, m64x2;
+    packed_simd::f64x4, f64, packed_simd::i64x4, m64x4;
+    packed_simd::f64x8, f64, packed_simd::i64x8, m64x8;
 );
 
 impl_int_simd!(

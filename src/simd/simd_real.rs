@@ -9,6 +9,11 @@ use crate::simd::{SimdComplexField, SimdPartialOrd, SimdSigned};
 pub trait SimdRealField:
     SimdPartialOrd + SimdSigned + SimdComplexField<SimdRealField = Self>
 {
+    /// Copies the sign of `self` to `to`.
+    ///
+    /// - Returns `to.simd_abs()` if `self` is positive or positive-zero.
+    /// - Returns `-to.simd_abs()` if `self` is negative or negative-zero.
+    fn simd_copysign(self, to: Self) -> Self;
     fn simd_atan2(self, other: Self) -> Self;
 
     fn simd_default_epsilon() -> Self;
@@ -40,6 +45,10 @@ impl<T: RealField> SimdRealField for T {
     #[inline(always)]
     fn simd_default_epsilon() -> Self {
         Self::default_epsilon()
+    }
+    #[inline(always)]
+    fn simd_copysign(self, to: Self) -> Self {
+        self.copysign(to)
     }
     #[inline(always)]
     fn simd_pi() -> Self {
