@@ -78,6 +78,11 @@ macro_rules! impl_bool_simd(
 
         impl SimdBool for Simd<$t> {
             #[inline(always)]
+            fn bitmask(self) -> u64 {
+                self.0.bitmask() as u64
+            }
+
+            #[inline(always)]
             fn and(self) -> bool {
                 self.0.and()
             }

@@ -168,6 +168,15 @@ impl BitAnd for WideBoolF32x4 {
 
 impl SimdBool for WideBoolF32x4 {
     #[inline(always)]
+    fn bitmask(self) -> u64 {
+        let arr = self.0.as_ref();
+        (((arr[0] != 0.0) as u64) << 0)
+            | (((arr[1] != 0.0) as u64) << 1)
+            | (((arr[2] != 0.0) as u64) << 2)
+            | (((arr[3] != 0.0) as u64) << 3)
+    }
+
+    #[inline(always)]
     fn and(self) -> bool {
         let arr = self.0.as_ref();
         (arr[0].to_bits() & arr[1].to_bits() & arr[2].to_bits() & arr[3].to_bits()) != 0

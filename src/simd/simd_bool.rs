@@ -9,6 +9,10 @@ use std::ops::{BitAnd, BitOr, BitXor};
 pub trait SimdBool:
     Copy + BitAnd<Self, Output = Self> + BitOr<Self, Output = Self> + BitXor<Self, Output = Self>
 {
+    /// A bit mask representing the boolean state of each lanes of `self`.
+    ///
+    /// The `i-th` bit of the result is `1` iff. the `i-th` lane of `self` is `true`.
+    fn bitmask(self) -> u64;
     /// Lane-wise bitwise and of the vector elements.
     fn and(self) -> bool;
     /// Lane-wise bitwise or of the vector elements.
@@ -67,6 +71,11 @@ pub trait SimdBool:
 
 impl SimdBool for bool {
     #[inline(always)]
+    fn bitmask(self) -> u64 {
+        self as u64
+    }
+
+    #[inline(always)]
     fn and(self) -> bool {
         self
     }
@@ -101,7 +110,8 @@ impl SimdBool for bool {
         self,
         if_value: impl FnOnce() -> Res,
         else_value: impl FnOnce() -> Res,
-    ) -> Res {
+    ) -> Res
+    {
         if self {
             if_value()
         } else {
@@ -115,7 +125,8 @@ impl SimdBool for bool {
         if_value: impl FnOnce() -> Res,
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_value: impl FnOnce() -> Res,
-    ) -> Res {
+    ) -> Res
+    {
         if self {
             if_value()
         } else if else_if.0() {
@@ -132,7 +143,8 @@ impl SimdBool for bool {
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_value: impl FnOnce() -> Res,
-    ) -> Res {
+    ) -> Res
+    {
         if self {
             if_value()
         } else if else_if.0() {
