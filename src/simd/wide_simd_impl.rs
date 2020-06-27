@@ -295,6 +295,13 @@ impl From<[f32; 4]> for WideF32x4 {
     }
 }
 
+impl From<WideF32x4> for [f32; 4] {
+    #[inline(always)]
+    fn from(val: WideF32x4) -> [f32; 4] {
+        *val.0.as_ref()
+    }
+}
+
 impl SubsetOf<WideF32x4> for WideF32x4 {
     #[inline(always)]
     fn to_superset(&self) -> Self {
@@ -566,6 +573,18 @@ impl SimdPartialOrd for WideF32x4 {
     fn simd_clamp(self, min: Self, max: Self) -> Self {
         WideF32x4(self.0.clamp(min.0, max.0))
     }
+
+    #[inline(always)]
+    fn simd_horizontal_min(self) -> Self::Element {
+        let arr = self.0.as_ref();
+        arr[0].min(arr[1]).min(arr[2]).min(arr[3])
+    }
+
+    #[inline(always)]
+    fn simd_horizontal_max(self) -> Self::Element {
+        let arr = self.0.as_ref();
+        arr[0].max(arr[1]).max(arr[2]).max(arr[3])
+    }
 }
 
 impl Neg for WideF32x4 {
@@ -614,7 +633,8 @@ impl SimdRealField for WideF32x4 {
 
     #[inline(always)]
     fn simd_copysign(self, to: Self) -> Self {
-        WideF32x4(self.0.copysign(to.0))
+        // WideF32x4(self.0.copysign(to.0))
+        WideF32x4((wide::f32x4::NEGATIVE_ZERO & self.0) | ((!wide::f32x4::NEGATIVE_ZERO) & to.0))
     }
 
     #[inline(always)]

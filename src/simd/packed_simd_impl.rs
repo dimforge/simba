@@ -271,6 +271,15 @@ macro_rules! impl_uint_simd(
             }
         }
 
+        impl From<Simd<$t>> for [$elt; <$t>::lanes()] {
+            #[inline(always)]
+            fn from(val: Simd<$t>) -> [$elt; <$t>::lanes()] {
+                let mut res = [<$elt>::zero(); <$t>::lanes()];
+                val.0.write_to_slice_unaligned(&mut res[..]);
+                res
+            }
+        }
+
         impl SubsetOf<Simd<$t>> for Simd<$t> {
             #[inline(always)]
             fn to_superset(&self) -> Self {
@@ -507,6 +516,16 @@ macro_rules! impl_uint_simd(
             #[inline(always)]
             fn simd_clamp(self, min: Self, max: Self) -> Self {
                 self.simd_max(min).simd_min(max)
+            }
+
+            #[inline(always)]
+            fn simd_horizontal_min(self) -> Self::Element {
+                self.0.min_element()
+            }
+
+            #[inline(always)]
+            fn simd_horizontal_max(self) -> Self::Element {
+                self.0.max_element()
             }
         }
 
