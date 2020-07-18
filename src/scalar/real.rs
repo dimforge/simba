@@ -192,9 +192,23 @@ macro_rules! impl_real(
     )*)
 );
 
-#[cfg(not(feature = "std"))]
-impl_real!(f32,f32,Float; f64,f64,Float);
-#[cfg(feature = "std")]
-impl_real!(f32,f32,f32; f64,f64,f64);
+#[cfg(all(not(feature = "std"), not(feature = "libm_force")))]
+impl_real!(f32, f32, Float; f64, f64, Float);
+#[cfg(all(feature = "std", not(feature = "libm_force")))]
+impl_real!(f32, f32, f32; f64, f64, f64);
+#[cfg(feature = "libm_force")]
+impl_real!(f32, f32, libm_force_f32; f64, f64, libm_force);
+
+// We use this dummy module to remove the 'f' suffix at the end of
+// each libm functions to make our generic Real/ComplexField impl
+// macros work.
+#[cfg(feature = "libm_force")]
+mod libm_force_f32 {
+    #[inline(always)]
+    pub fn atan2(y: f32, x: f32) -> f32 {
+        libm_force::atan2f(y, x)
+    }
+}
+
 //#[cfg(feature = "decimal")]
 //impl_real!(d128, d128, d128);
