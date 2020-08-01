@@ -9,6 +9,7 @@ use fixed::types::extra::{
 };
 use num::{Bounded, FromPrimitive, Num, One, Signed, Zero};
 use std::cmp::Ordering;
+use std::hash::{Hash, Hasher};
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
@@ -32,6 +33,12 @@ macro_rules! impl_fixed_type(
             #[inline(always)]
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                 self.0.partial_cmp(&other.0)
+            }
+        }
+
+        impl<Fract: $LeEqDim> Hash for $FixedI<Fract> {
+            fn hash<H: Hasher>(&self, h: &mut H) {
+                self.0.hash(h);
             }
         }
 
