@@ -3,9 +3,10 @@
 //! Implementation of traits form fixed-point numbers.
 use crate::scalar::{ComplexField, Field, RealField, SubsetOf};
 use crate::simd::{PrimitiveSimdValue, SimdValue};
+use fixed::traits::ToFixed;
 use fixed::types::extra::{
-    IsLessOrEqual, LeEqU16, LeEqU32, LeEqU64, LeEqU8, True, Unsigned, U13, U14, U16, U29, U30, U32,
-    U5, U6, U61, U62, U64, U8,
+    IsLessOrEqual, LeEqU16, LeEqU32, LeEqU64, LeEqU8, True, Unsigned, U12, U13, U14, U15, U28, U29,
+    U30, U31, U4, U5, U6, U60, U61, U62, U63, U7,
 };
 use num::{Bounded, FromPrimitive, Num, One, Signed, Zero};
 use std::cmp::Ordering;
@@ -15,7 +16,7 @@ use std::ops::{
 };
 
 macro_rules! impl_fixed_type(
-    ($($FixedI: ident, $Int: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident;)*) => {$(
+    ($($FixedI: ident, $Int: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident, $LeEqDim4: ident;)*) => {$(
         #[derive(Copy, Clone)]
         /// Signed fixed-point number with a generic number of bits for the fractional part.
         pub struct $FixedI<Fract: $LeEqDim>(pub fixed::$FixedI<Fract>);
@@ -361,41 +362,41 @@ macro_rules! impl_fixed_type(
         }
 
         impl<Fract: $LeEqDim> FromPrimitive for $FixedI<Fract> {
-            fn from_i64(_n: i64) -> Option<Self> {
-                unimplemented!()
+            fn from_i64(n: i64) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_u64(_n: u64) -> Option<Self> {
-                unimplemented!()
+            fn from_u64(n: u64) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_isize(_n: isize) -> Option<Self> {
-                unimplemented!()
+            fn from_isize(n: isize) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_i8(_n: i8) -> Option<Self> {
-                unimplemented!()
+            fn from_i8(n: i8) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_i16(_n: i16) -> Option<Self> {
-                unimplemented!()
+            fn from_i16(n: i16) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_i32(_n: i32) -> Option<Self> {
-                unimplemented!()
+            fn from_i32(n: i32) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_usize(_n: usize) -> Option<Self> {
-                unimplemented!()
+            fn from_usize(n: usize) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_u8(_n: u8) -> Option<Self> {
-                unimplemented!()
+            fn from_u8(n: u8) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_u16(_n: u16) -> Option<Self> {
-                unimplemented!()
+            fn from_u16(n: u16) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_u32(_n: u32) -> Option<Self> {
-                unimplemented!()
+            fn from_u32(n: u32) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_f32(_n: f32) -> Option<Self> {
-                unimplemented!()
+            fn from_f32(n: f32) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
-            fn from_f64(_n: f64) -> Option<Self> {
-                unimplemented!()
+            fn from_f64(n: f64) -> Option<Self> {
+                n.checked_to_fixed().map(Self)
             }
         }
 
@@ -423,9 +424,11 @@ macro_rules! impl_fixed_type(
 
         impl<Fract: Send + Sync + 'static> ComplexField for $FixedI<Fract>
             where Fract: Unsigned
+                    + $LeEqDim
                     + IsLessOrEqual<$LeEqDim1, Output = True>
                     + IsLessOrEqual<$LeEqDim2, Output = True>
-                    + IsLessOrEqual<$LeEqDim3, Output = True> {
+                    + IsLessOrEqual<$LeEqDim3, Output = True>
+                    + IsLessOrEqual<$LeEqDim4, Output = True> {
             type RealField = Self;
 
             #[inline]
@@ -513,7 +516,7 @@ macro_rules! impl_fixed_type(
 
             #[inline]
             fn trunc(self) -> Self {
-                unimplemented!()
+                Self(self.0.int())
             }
 
             #[inline]
@@ -690,23 +693,25 @@ macro_rules! impl_fixed_type(
 
             #[inline]
             fn is_finite(&self) -> bool {
-                unimplemented!()
+                true
             }
         }
 
         impl<Fract: Send + Sync + 'static> RealField for $FixedI<Fract>
             where Fract: Unsigned
+                    + $LeEqDim
                     + IsLessOrEqual<$LeEqDim1, Output = True>
                     + IsLessOrEqual<$LeEqDim2, Output = True>
-                    + IsLessOrEqual<$LeEqDim3, Output = True> {
+                    + IsLessOrEqual<$LeEqDim3, Output = True>
+                    + IsLessOrEqual<$LeEqDim4, Output = True> {
             #[inline]
             fn is_sign_positive(self) -> bool {
-                unimplemented!()
+                self.0.is_positive()
             }
 
             #[inline]
             fn is_sign_negative(self) -> bool {
-                unimplemented!()
+                self.0.is_negative()
             }
 
             #[inline]
@@ -770,13 +775,13 @@ macro_rules! impl_fixed_type(
             /// pi / 4.0.
             #[inline]
             fn frac_pi_4() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::FRAC_PI_4)
             }
 
             /// pi / 6.0.
             #[inline]
             fn frac_pi_6() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::FRAC_PI_6)
             }
 
             /// pi / 8.0.
@@ -794,53 +799,53 @@ macro_rules! impl_fixed_type(
             /// 2.0 / pi.
             #[inline]
             fn frac_2_pi() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::FRAC_2_PI)
             }
 
             /// 2.0 / sqrt(pi).
             #[inline]
             fn frac_2_sqrt_pi() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::FRAC_2_SQRT_PI)
             }
 
             /// Euler's number.
             #[inline]
             fn e() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::E)
             }
 
             /// log2(e).
             #[inline]
             fn log2_e() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::LOG2_E)
             }
 
             /// log10(e).
             #[inline]
             fn log10_e() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::LOG10_E)
             }
 
             /// ln(2.0).
             #[inline]
             fn ln_2() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::LN_2)
             }
 
             /// ln(10.0).
             #[inline]
             fn ln_10() -> Self {
-                unimplemented!()
+                Self(fixed::$FixedI::LN_10)
             }
         }
     )*}
 );
 
 impl_fixed_type!(
-    FixedI8, i8, LeEqU8, U8, U6, U5;
-    FixedI16, i16, LeEqU16, U16, U14, U13;
-    FixedI32, i32, LeEqU32, U32, U30, U29;
-    FixedI64, i64, LeEqU64, U64, U62, U61;
+    FixedI8, i8, LeEqU8, U7, U6, U5, U4;
+    FixedI16, i16, LeEqU16, U15, U14, U13, U12;
+    FixedI32, i32, LeEqU32, U31, U30, U29, U28;
+    FixedI64, i64, LeEqU64, U63, U62, U61, U60;
 );
 
 pub type FixedI8F0 = FixedI8<fixed::types::extra::U0>;
