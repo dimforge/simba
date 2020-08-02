@@ -9,6 +9,7 @@ use fixed::types::extra::{
     U30, U31, U4, U5, U6, U60, U61, U62, U63, U7,
 };
 use num::{Bounded, FromPrimitive, Num, One, Signed, Zero};
+#[cfg(feature = "serde_serialize")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
@@ -840,12 +841,14 @@ macro_rules! impl_fixed_type(
             }
         }
 
+        #[cfg(feature = "serde_serialize")]
         impl<Fract: $LeEqDim> Serialize for $FixedI<Fract> {
             fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
                 self.0.serialize(serializer)
             }
         }
 
+        #[cfg(feature = "serde_serialize")]
         impl<'de, Fract: $LeEqDim> Deserialize<'de> for $FixedI<Fract> {
             fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
                 fixed::$FixedI::deserialize(deserializer).map($FixedI)

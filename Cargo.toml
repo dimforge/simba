@@ -14,6 +14,7 @@ edition = "2018"
 default = [ "std" ]
 std = [ ]
 partial_fixed_point_support = [ "fixed", "cordic" ]
+serde_serialize = [ "serde", "fixed/serde" ]
 
 [dependencies]
 num-traits  = { version = "0.2.11", default-features = false, features = ["libm"] }
@@ -22,11 +23,11 @@ decimal     = { version = "2.0", default-features = false, optional = true }
 num-complex = { version = "0.2", default-features = false }
 packed_simd = { version = "0.3", optional = true }
 wide        = { version = "0.4", optional = true }
-fixed       = { version = "1", features = [ "serde" ], optional = true }
+fixed       = { version = "1", optional = true }
 cordic      = { version = "0.1", optional = true }
 paste       = "0.1"
 rand        = { version = "0.7", optional = true }
-serde       = { version = "1", default-features = false }
+serde       = { version = "1", default-features = false, optional = true }
 
 [package.metadata.docs.rs]
 all-features = true
