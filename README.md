@@ -8,13 +8,13 @@
         <img src="https://img.shields.io/discord/507548572338880513.svg?logo=discord&colorB=7289DA">
     </a>
     <a href="https://travis-ci.org/sebcrozet/simba">
-        <img src="https://travis-ci.org/rustsim/simba.svg?branch=master" alt="Build status">
+        <img src="https://travis-ci.org/dimforge/simba.svg?branch=master" alt="Build status">
     </a>
     <a href="https://crates.io/crates/simba">
          <img src="https://meritbadge.herokuapp.com/simba?style=flat-square" alt="crates.io">
     </a>
-    <a href="https://opensource.org/licenses/BSD-3-Clause">
-        <img src="https://img.shields.io/badge/license-BSD%203--Clause-blue.svg?style=flat">
+    <a href="https://opensource.org/licenses/Apache-2.0">
+        <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
     </a>
 </p>
 <p align = "center">
@@ -31,11 +31,3 @@
 </p>
 
 -----
-
-<p align = "center">
-  <i>Click this button if you wish to donate to support the development of</i> <b>simba</b>:
-</p>
-
-<p align = "center">
-    <a href="https://www.patreon.com/bePatron?u=7111380" ><img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" alt="Become a Patron!" /></a>
-</p>

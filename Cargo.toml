@@ -5,9 +5,9 @@ authors = ["sebcrozet <developer@crozet.re>"]
 description = "SIMD algebra for Rust"
 keywords = ["algebra", "simd", "math"]
 readme = "README.md"
-repository = "https://github.com/rustsim/simba"
+repository = "https://github.com/dimforge/simba"
 documentation = "https://docs.rs/simba"
-license = "BSD-3-Clause"
+license = "Apache-2.0"
 edition = "2018"
 
 [features]
