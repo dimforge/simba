@@ -168,6 +168,15 @@ impl BitAnd for WideBoolF32x4 {
 
 impl SimdBool for WideBoolF32x4 {
     #[inline(always)]
+    fn bitmask(self) -> u64 {
+        let arr = self.0.as_ref();
+        (((arr[0] != 0.0) as u64) << 0)
+            | (((arr[1] != 0.0) as u64) << 1)
+            | (((arr[2] != 0.0) as u64) << 2)
+            | (((arr[3] != 0.0) as u64) << 3)
+    }
+
+    #[inline(always)]
     fn and(self) -> bool {
         let arr = self.0.as_ref();
         (arr[0].to_bits() & arr[1].to_bits() & arr[2].to_bits() & arr[3].to_bits()) != 0
@@ -280,6 +289,13 @@ impl From<[f32; 4]> for WideF32x4 {
     #[inline(always)]
     fn from(vals: [f32; 4]) -> Self {
         WideF32x4(wide::f32x4::new(vals[0], vals[1], vals[2], vals[3]))
+    }
+}
+
+impl From<WideF32x4> for [f32; 4] {
+    #[inline(always)]
+    fn from(val: WideF32x4) -> [f32; 4] {
+        *val.0.as_ref()
     }
 }
 
@@ -554,6 +570,18 @@ impl SimdPartialOrd for WideF32x4 {
     fn simd_clamp(self, min: Self, max: Self) -> Self {
         WideF32x4(self.0.clamp(min.0, max.0))
     }
+
+    #[inline(always)]
+    fn simd_horizontal_min(self) -> Self::Element {
+        let arr = self.0.as_ref();
+        arr[0].min(arr[1]).min(arr[2]).min(arr[3])
+    }
+
+    #[inline(always)]
+    fn simd_horizontal_max(self) -> Self::Element {
+        let arr = self.0.as_ref();
+        arr[0].max(arr[1]).max(arr[2]).max(arr[3])
+    }
 }
 
 impl Neg for WideF32x4 {
@@ -598,6 +626,12 @@ impl SimdRealField for WideF32x4 {
     #[inline(always)]
     fn simd_atan2(self, other: Self) -> Self {
         self.zip_map_lanes(other, |a, b| a.atan2(b))
+    }
+
+    #[inline(always)]
+    fn simd_copysign(self, to: Self) -> Self {
+        // WideF32x4(self.0.copysign(to.0))
+        WideF32x4((wide::f32x4::NEGATIVE_ZERO & self.0) | ((!wide::f32x4::NEGATIVE_ZERO) & to.0))
     }
 
     #[inline(always)]

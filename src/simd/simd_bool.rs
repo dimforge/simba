@@ -9,6 +9,10 @@ use std::ops::{BitAnd, BitOr, BitXor};
 pub trait SimdBool:
     Copy + BitAnd<Self, Output = Self> + BitOr<Self, Output = Self> + BitXor<Self, Output = Self>
 {
+    /// A bit mask representing the boolean state of each lanes of `self`.
+    ///
+    /// The `i-th` bit of the result is `1` iff. the `i-th` lane of `self` is `true`.
+    fn bitmask(self) -> u64;
     /// Lane-wise bitwise and of the vector elements.
     fn and(self) -> bool;
     /// Lane-wise bitwise or of the vector elements.
@@ -66,6 +70,11 @@ pub trait SimdBool:
 }
 
 impl SimdBool for bool {
+    #[inline(always)]
+    fn bitmask(self) -> u64 {
+        self as u64
+    }
+
     #[inline(always)]
     fn and(self) -> bool {
         self

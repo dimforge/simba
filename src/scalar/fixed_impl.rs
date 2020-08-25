@@ -23,6 +23,12 @@ macro_rules! impl_fixed_type(
         /// Signed fixed-point number with a generic number of bits for the fractional part.
         pub struct $FixedI<Fract: $LeEqDim>(pub fixed::$FixedI<Fract>);
 
+        impl<Fract: $LeEqDim> $FixedI<Fract> {
+            pub fn from_num<N: fixed::traits::ToFixed>(val: N) -> Self {
+                $FixedI(fixed::$FixedI::from_num(val))
+            }
+        }
+
         impl<Fract: $LeEqDim> PartialEq for $FixedI<Fract> {
             #[inline(always)]
             fn eq(&self, other: &Self) -> bool {
@@ -714,6 +720,15 @@ macro_rules! impl_fixed_type(
             #[inline]
             fn is_sign_negative(self) -> bool {
                 self.0.is_negative()
+            }
+
+            #[inline]
+            fn copysign(self, rhs: Self) -> Self {
+                if self >= Self::zero() {
+                    rhs.abs()
+                } else {
+                    -rhs.abs()
+                }
             }
 
             #[inline]

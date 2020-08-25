@@ -44,12 +44,12 @@ jobs:
           name: build
           command: cargo web build --verbose --target wasm32-unknown-unknown;
   build-no-std:
-    executor: rust-executor
+    executor: rust-nightly-executor
     steps:
       - checkout
       - run:
           name: install xargo
-          command: cargo install -f xargo;
+          command: rustup component add rust-src; cargo install -f xargo;
       - run:
           name: build
           command: xargo build --verbose --no-default-features --target=x86_64-unknown-linux-gnu;

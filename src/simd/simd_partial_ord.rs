@@ -19,11 +19,16 @@ pub trait SimdPartialOrd: SimdValue {
     fn simd_max(self, other: Self) -> Self;
     /// Lanewise min value.
     fn simd_min(self, other: Self) -> Self;
-    /// Clamps each lane of `self` between the correspondin lane of `min` and `max`.
+    /// Clamps each lane of `self` between the corresponding lane of `min` and `max`.
     fn simd_clamp(self, min: Self, max: Self) -> Self;
+
+    /// The min value among all lanes of `self`.
+    fn simd_horizontal_min(self) -> Self::Element;
+    /// The max value among all lanes of `self`.
+    fn simd_horizontal_max(self) -> Self::Element;
 }
 
-impl<T: PartialOrd + SimdValue<SimdBool = bool>> SimdPartialOrd for T {
+impl<T: PartialOrd + SimdValue<Element = T, SimdBool = bool>> SimdPartialOrd for T {
     #[inline(always)]
     fn simd_gt(self, other: Self) -> Self::SimdBool {
         self > other
@@ -81,5 +86,15 @@ impl<T: PartialOrd + SimdValue<SimdBool = bool>> SimdPartialOrd for T {
         } else {
             self
         }
+    }
+
+    #[inline(always)]
+    fn simd_horizontal_min(self) -> Self::Element {
+        self
+    }
+
+    #[inline(always)]
+    fn simd_horizontal_max(self) -> Self::Element {
+        self
     }
 }

@@ -5,7 +5,7 @@ use approx::{RelativeEq, UlpsEq};
 
 use crate::scalar::ComplexField;
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 use num::Float;
 //#[cfg(feature = "decimal")]
 //use decimal::d128;
@@ -24,6 +24,11 @@ pub trait RealField:
     fn is_sign_positive(self) -> bool;
     /// Is the sign of this real number negative?
     fn is_sign_negative(self) -> bool;
+    /// Copies the sign of `self` to `to`.
+    ///
+    /// - Returns `to.simd_abs()` if `self` is positive or positive-zero.
+    /// - Returns `-to.simd_abs()` if `self` is negative or negative-zero.
+    fn copysign(self, to: Self) -> Self;
 
     fn max(self, other: Self) -> Self;
     fn min(self, other: Self) -> Self;
@@ -59,6 +64,12 @@ macro_rules! impl_real(
             #[inline]
             fn is_sign_negative(self) -> bool {
                 $M::is_sign_negative(self)
+            }
+
+            #[inline(always)]
+            fn copysign(self, to: Self) -> Self {
+                let signbit = (-0.0 as $T).to_bits();
+                Self::from_bits((signbit & self.to_bits()) | ((!signbit) & to.to_bits()))
             }
 
             #[inline]
@@ -181,9 +192,23 @@ macro_rules! impl_real(
     )*)
 );
 
-#[cfg(not(feature = "std"))]
-impl_real!(f32,f32,Float; f64,f64,Float);
-#[cfg(feature = "std")]
-impl_real!(f32,f32,f32; f64,f64,f64);
+#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
+impl_real!(f32, f32, Float; f64, f64, Float);
+#[cfg(all(feature = "std", not(feature = "libm_force")))]
+impl_real!(f32, f32, f32; f64, f64, f64);
+#[cfg(feature = "libm_force")]
+impl_real!(f32, f32, libm_force_f32; f64, f64, libm_force);
+
+// We use this dummy module to remove the 'f' suffix at the end of
+// each libm functions to make our generic Real/ComplexField impl
+// macros work.
+#[cfg(feature = "libm_force")]
+mod libm_force_f32 {
+    #[inline(always)]
+    pub fn atan2(y: f32, x: f32) -> f32 {
+        libm_force::atan2f(y, x)
+    }
+}
+
 //#[cfg(feature = "decimal")]
 //impl_real!(d128, d128, d128);
