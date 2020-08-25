@@ -5,7 +5,7 @@ use approx::{RelativeEq, UlpsEq};
 
 use crate::scalar::ComplexField;
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 use num::Float;
 //#[cfg(feature = "decimal")]
 //use decimal::d128;
@@ -192,7 +192,7 @@ macro_rules! impl_real(
     )*)
 );
 
-#[cfg(all(not(feature = "std"), not(feature = "libm_force")))]
+#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 impl_real!(f32, f32, Float; f64, f64, Float);
 #[cfg(all(feature = "std", not(feature = "libm_force")))]
 impl_real!(f32, f32, f32; f64, f64, f64);

@@ -5,7 +5,7 @@ use std::ops::Neg;
 use std::{f32, f64};
 
 use crate::scalar::{Field, RealField, SubsetOf, SupersetOf};
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 use num::Float;
 //#[cfg(feature = "decimal")]
 //use decimal::d128;
@@ -468,7 +468,7 @@ macro_rules! impl_complex(
     )*)
 );
 
-#[cfg(all(not(feature = "std"), not(feature = "libm_force")))]
+#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 impl_complex!(
     f32, f32, Float;
     f64, f64, Float
@@ -479,6 +479,7 @@ impl_complex!(
     f32,f32,f32;
     f64,f64,f64
 );
+
 #[cfg(feature = "libm_force")]
 impl ComplexField for f32 {
     type RealField = f32;
