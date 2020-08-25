@@ -1,0 +1,7 @@
+## Release v0.2.0
+- The use of `libm` in `#[no-std]` environments is now opt-in by enabling the `libm` feature.
+- If the `libm` is not enabled in a `#[no-std]` environment, then no `RealField` or `ComplexField` impls will be provided for floats.
+- Add the `libm_force` cargo feature that forces the use of `libm`, even when we don't target `no-std`.
+- Add `copysign` to copy the sign from one number to another.
+- Add `simd_horizontal_min`, `simd_horizontal_max` to compute the min/max among the lanes of a single SIMD number.
+- Wrap all SIMD bools from `packed_simd` into our own `Simd<_>` newtype.
