@@ -110,8 +110,7 @@ impl SimdBool for bool {
         self,
         if_value: impl FnOnce() -> Res,
         else_value: impl FnOnce() -> Res,
-    ) -> Res
-    {
+    ) -> Res {
         if self {
             if_value()
         } else {
@@ -125,8 +124,7 @@ impl SimdBool for bool {
         if_value: impl FnOnce() -> Res,
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_value: impl FnOnce() -> Res,
-    ) -> Res
-    {
+    ) -> Res {
         if self {
             if_value()
         } else if else_if.0() {
@@ -143,8 +141,7 @@ impl SimdBool for bool {
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_value: impl FnOnce() -> Res,
-    ) -> Res
-    {
+    ) -> Res {
         if self {
             if_value()
         } else if else_if.0() {

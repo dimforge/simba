@@ -214,8 +214,7 @@ impl SimdBool for WideBoolF32x4 {
         self,
         if_value: impl FnOnce() -> Res,
         else_value: impl FnOnce() -> Res,
-    ) -> Res
-    {
+    ) -> Res {
         let a = if_value();
         let b = else_value();
         a.select(self, b)
@@ -227,8 +226,7 @@ impl SimdBool for WideBoolF32x4 {
         if_value: impl FnOnce() -> Res,
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_value: impl FnOnce() -> Res,
-    ) -> Res
-    {
+    ) -> Res {
         let a = if_value();
         let b = else_if.1();
         let c = else_value();
@@ -246,8 +244,7 @@ impl SimdBool for WideBoolF32x4 {
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
         else_value: impl FnOnce() -> Res,
-    ) -> Res
-    {
+    ) -> Res {
         let a = if_value();
         let b = else_if.1();
         let c = else_else_if.1();
