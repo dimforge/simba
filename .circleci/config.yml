@@ -44,7 +44,7 @@ jobs:
           name: build
           command: cargo web build --verbose --target wasm32-unknown-unknown;
   build-no-std:
-    executor: rust-executor
+    executor: rust-nightly-executor
     steps:
       - checkout
       - run:
