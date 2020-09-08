@@ -265,6 +265,18 @@ macro_rules! impl_uint_simd(
     ($($t: ty, $elt: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_simd_value!($t, $elt, $bool $(, $i)*;);
 
+        impl Simd<$t> {
+            /// Instantiates a new vector with the values of the `slice`.
+            ///
+            /// # Panics
+            ///
+            /// If `slice.len() < Self::lanes()`.
+            #[inline]
+            pub fn from_slice_unaligned(slice: &[$elt]) -> Self {
+                Simd(<$t>::from_slice_unaligned(slice))
+            }
+        }
+
         impl From<[$elt; <$t>::lanes()]> for Simd<$t> {
             #[inline(always)]
             fn from(vals: [$elt; <$t>::lanes()]) -> Self {
