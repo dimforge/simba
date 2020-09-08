@@ -211,6 +211,7 @@ macro_rules! impl_simd_value(
         }
 
         impl Simd<$t> {
+            #[inline]
             pub fn new($($i: $elt),*) -> Self {
                 Simd(<$t>::new($($i),*))
             }
