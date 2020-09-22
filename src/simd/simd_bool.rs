@@ -1,5 +1,5 @@
 use crate::simd::SimdValue;
-use std::ops::{BitAnd, BitOr, BitXor};
+use std::ops::{BitAnd, BitOr, BitXor, Not};
 
 /// Lane-wise generalization of `bool` for SIMD booleans.
 ///
@@ -7,7 +7,11 @@ use std::ops::{BitAnd, BitOr, BitXor};
 /// It is designed to abstract the behavior of booleans so it can work with multi-lane boolean
 /// values in an AoSoA setting.
 pub trait SimdBool:
-    Copy + BitAnd<Self, Output = Self> + BitOr<Self, Output = Self> + BitXor<Self, Output = Self>
+    Copy
+    + BitAnd<Self, Output = Self>
+    + BitOr<Self, Output = Self>
+    + BitXor<Self, Output = Self>
+    + Not<Output = Self>
 {
     /// A bit mask representing the boolean state of each lanes of `self`.
     ///
