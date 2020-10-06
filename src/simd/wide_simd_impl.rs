@@ -13,8 +13,8 @@ use num::{FromPrimitive, Num, One, Zero};
 use std::{
     cmp::PartialEq,
     ops::{
-        Add, AddAssign, BitAnd, BitOr, BitXor, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign,
-        Sub, SubAssign,
+        Add, AddAssign, BitAnd, BitOr, BitXor, Div, DivAssign, Mul, MulAssign, Neg, Not, Rem,
+        RemAssign, Sub, SubAssign,
     },
 };
 
@@ -136,6 +136,15 @@ impl PartialEq for WideBoolF32x4 {
         let hack_a = wide::ConstUnionHack_f32x4 { wide_thing: self.0 };
         let hack_b = wide::ConstUnionHack_f32x4 { wide_thing: rhs.0 };
         unsafe { hack_a.u == hack_b.u }
+    }
+}
+
+impl Not for WideBoolF32x4 {
+    type Output = Self;
+
+    #[inline]
+    fn not(self) -> Self {
+        Self(!self.0)
     }
 }
 

@@ -1,5 +1,6 @@
 //! Traits implemented by SIMD types and non-SIMD types.
 
+pub use self::auto_simd_impl::*;
 #[cfg(feature = "packed_simd")]
 pub use self::packed_simd_impl::*;
 pub use self::simd_bool::SimdBool;
@@ -12,6 +13,7 @@ pub use self::simd_value::{PrimitiveSimdValue, SimdValue};
 #[cfg(feature = "wide")]
 pub use self::wide_simd_impl::{WideBoolF32x4, WideF32x4};
 
+mod auto_simd_impl;
 #[cfg(feature = "packed_simd")]
 mod packed_simd_impl;
 mod simd_bool;
