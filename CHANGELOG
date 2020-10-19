@@ -1,3 +1,17 @@
+## Release v0.2.3
+- Add `.to_bits` to our fixed-point number newtype.
+- Add `::from_bits` to our fixed-point number newtype.
+- Add `Ord` implementation for our fixed-point number newtype.
+- Add `Mul<int>, Div<int>, Rem<int>, MulAssign<int>, DivAssign<int>, RemAssign<int>` implementation for our fixed-point
+  number newtype, where `int` is the underlying integer used by the fixed-point number.
+
+## Release v0.2.2
+- Fix a compilation error when building simba with out `std` and with the `libm` feature.
+
+## Release v0.2.1
+- Add SIMD types named, e.g. `AutoF32x4`, based on auto-vectorization only. They don't call any SIMD intrinsics and let the compiler do the
+vectorization, if it can.
+
 ## Release v0.2.0
 - The use of `libm` in `#[no-std]` environments is now opt-in by enabling the `libm` feature.
 - If the `libm` is not enabled in a `#[no-std]` environment, then no `RealField` or `ComplexField` impls will be provided for floats.
