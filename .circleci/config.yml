@@ -33,6 +33,9 @@ jobs:
       - run:
           name: build --features wide
           command: cargo build --features wide
+      - run:
+          name: build --features partial_fixed_point_support
+          command: cargo build --features partial_fixed_point_support
   build-wasm:
     executor: rust-executor
     steps:
