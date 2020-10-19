@@ -24,8 +24,22 @@ macro_rules! impl_fixed_type(
         pub struct $FixedI<Fract: $LeEqDim>(pub fixed::$FixedI<Fract>);
 
         impl<Fract: $LeEqDim> $FixedI<Fract> {
+            /// Creates a fixed-point number from another number.
+            #[inline(always)]
             pub fn from_num<N: fixed::traits::ToFixed>(val: N) -> Self {
                 $FixedI(fixed::$FixedI::from_num(val))
+            }
+
+            /// Creates a fixed-point number that has a bitwise representation identical to the given integer.
+            #[inline(always)]
+            pub fn from_bits(bits: $Int) -> Self {
+                $FixedI(fixed::$FixedI::from_bits(bits))
+            }
+
+            /// Creates an integer that has a bitwise representation identical to the given fixed-point number.
+            #[inline(always)]
+            pub fn to_bits(self) -> $Int {
+                self.0.to_bits()
             }
         }
 
@@ -42,6 +56,13 @@ macro_rules! impl_fixed_type(
             #[inline(always)]
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
                 self.0.partial_cmp(&other.0)
+            }
+        }
+
+        impl<Fract: $LeEqDim> Ord for $FixedI<Fract> {
+            #[inline(always)]
+            fn cmp(&self, other: &Self) -> Ordering {
+                self.0.cmp(&other.0)
             }
         }
 
@@ -122,6 +143,14 @@ macro_rules! impl_fixed_type(
             }
         }
 
+        impl<Fract: $LeEqDim> Mul<$Int> for $FixedI<Fract> {
+            type Output = Self;
+            #[inline(always)]
+            fn mul(self, rhs: $Int) -> Self {
+                Self(self.0 * rhs)
+            }
+        }
+
         impl<Fract: $LeEqDim> Div for $FixedI<Fract> {
             type Output = Self;
             #[inline(always)]
@@ -130,11 +159,27 @@ macro_rules! impl_fixed_type(
             }
         }
 
+        impl<Fract: $LeEqDim> Div<$Int> for $FixedI<Fract> {
+            type Output = Self;
+            #[inline(always)]
+            fn div(self, rhs: $Int) -> Self {
+                Self(self.0 / rhs)
+            }
+        }
+
         impl<Fract: $LeEqDim> Rem for $FixedI<Fract> {
             type Output = Self;
             #[inline(always)]
             fn rem(self, rhs: Self) -> Self {
                 Self(self.0 % rhs.0)
+            }
+        }
+
+        impl<Fract: $LeEqDim> Rem<$Int> for $FixedI<Fract> {
+            type Output = Self;
+            #[inline(always)]
+            fn rem(self, rhs: $Int) -> Self {
+                Self(self.0 % rhs)
             }
         }
 
@@ -169,6 +214,13 @@ macro_rules! impl_fixed_type(
             }
         }
 
+        impl<Fract: $LeEqDim> MulAssign<$Int> for $FixedI<Fract> {
+            #[inline(always)]
+            fn mul_assign(&mut self, rhs: $Int) {
+                self.0 *= rhs
+            }
+        }
+
         impl<Fract: $LeEqDim> DivAssign for $FixedI<Fract> {
             #[inline(always)]
             fn div_assign(&mut self, rhs: Self) {
@@ -176,10 +228,24 @@ macro_rules! impl_fixed_type(
             }
         }
 
+        impl<Fract: $LeEqDim> DivAssign<$Int> for $FixedI<Fract> {
+            #[inline(always)]
+            fn div_assign(&mut self, rhs: $Int) {
+                self.0 /= rhs
+            }
+        }
+
         impl<Fract: $LeEqDim> RemAssign for $FixedI<Fract> {
             #[inline(always)]
             fn rem_assign(&mut self, rhs: Self) {
                 self.0 %= rhs.0
+            }
+        }
+
+        impl<Fract: $LeEqDim> RemAssign<$Int> for $FixedI<Fract> {
+            #[inline(always)]
+            fn rem_assign(&mut self, rhs: $Int) {
+                self.0 %= rhs
             }
         }
 
