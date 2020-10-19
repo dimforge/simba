@@ -819,7 +819,7 @@ macro_rules! impl_float_simd(
 
             #[inline(always)]
             fn simd_floor(self) -> Self {
-                self.map(|e| e.floor())
+                self.map(|e| e.simd_floor())
             }
 
             #[inline(always)]
