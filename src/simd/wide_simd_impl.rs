@@ -638,9 +638,9 @@ impl SimdRealField for WideF32x4 {
     }
 
     #[inline(always)]
-    fn simd_copysign(self, to: Self) -> Self {
+    fn simd_copysign(self, sign: Self) -> Self {
         // WideF32x4(self.0.copysign(to.0))
-        WideF32x4((wide::f32x4::NEGATIVE_ZERO & self.0) | ((!wide::f32x4::NEGATIVE_ZERO) & to.0))
+        WideF32x4((wide::f32x4::NEGATIVE_ZERO & sign.0) | ((!wide::f32x4::NEGATIVE_ZERO) & self.0))
     }
 
     #[inline(always)]

@@ -665,8 +665,8 @@ macro_rules! impl_float_simd(
             }
 
             #[inline(always)]
-            fn simd_copysign(self, to: Self) -> Self {
-                self.zip_map(to, |x, y| x.simd_copysign(y))
+            fn simd_copysign(self, sign: Self) -> Self {
+                self.zip_map(sign, |me, sgn| me.simd_copysign(sgn))
             }
 
             #[inline(always)]
