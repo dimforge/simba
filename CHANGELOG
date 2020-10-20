@@ -1,3 +1,7 @@
+## Release v0.2.4
+- Make `Fixed.to_bits` and `Fixed::from_bits` const-fn.
+- Make our `Fixed` wrapper type `repr(transparent)`.
+
 ## Release v0.2.3
 - Add `.to_bits` to our fixed-point number newtype.
 - Add `::from_bits` to our fixed-point number newtype.
