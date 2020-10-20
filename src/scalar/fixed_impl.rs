@@ -20,6 +20,7 @@ use std::ops::{
 macro_rules! impl_fixed_type(
     ($($FixedI: ident, $Int: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident, $LeEqDim4: ident;)*) => {$(
         #[derive(Copy, Clone)]
+        #[repr(transparent)]
         /// Signed fixed-point number with a generic number of bits for the fractional part.
         pub struct $FixedI<Fract: $LeEqDim>(pub fixed::$FixedI<Fract>);
 
