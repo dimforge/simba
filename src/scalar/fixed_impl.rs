@@ -22,7 +22,7 @@ macro_rules! impl_fixed_type(
         #[derive(Copy, Clone)]
         #[repr(transparent)]
         /// Signed fixed-point number with a generic number of bits for the fractional part.
-        pub struct $FixedI<Fract: $LeEqDim>(pub fixed::$FixedI<Fract>);
+        pub struct $FixedI<Fract>(pub fixed::$FixedI<Fract>);
 
         impl<Fract: $LeEqDim> $FixedI<Fract> {
             /// Creates a fixed-point number from another number.
@@ -30,16 +30,18 @@ macro_rules! impl_fixed_type(
             pub fn from_num<N: fixed::traits::ToFixed>(val: N) -> Self {
                 $FixedI(fixed::$FixedI::from_num(val))
             }
+        }
 
+        impl<Fract> $FixedI<Fract> {
             /// Creates a fixed-point number that has a bitwise representation identical to the given integer.
             #[inline(always)]
-            pub fn from_bits(bits: $Int) -> Self {
+            pub const fn from_bits(bits: $Int) -> Self {
                 $FixedI(fixed::$FixedI::from_bits(bits))
             }
 
             /// Creates an integer that has a bitwise representation identical to the given fixed-point number.
             #[inline(always)]
-            pub fn to_bits(self) -> $Int {
+            pub const fn to_bits(self) -> $Int {
                 self.0.to_bits()
             }
         }
