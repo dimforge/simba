@@ -7,6 +7,8 @@ semantic change to justify a major release:
   the standard library, thus avoiding hard-to-debug errors due to mismatching conventions.
 - The arguments of `simd_copysign` are now swapped too.
 
+This release also updatse the `num-complex` dependency to its latest version 0.3.
+
 ## Release v0.2.4
 - Make `Fixed.to_bits` and `Fixed::from_bits` const-fn.
 - Make our `Fixed` wrapper type `repr(transparent)`.
