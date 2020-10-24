@@ -17,6 +17,7 @@ use std::{
         RemAssign, Sub, SubAssign,
     },
 };
+use wide::{CmpEq, CmpGe, CmpGt, CmpLe, CmpLt, CmpNe};
 
 /// A wrapper type of `wide::f32x4` that implements all the relevant traits from `num` and `simba`.
 ///
@@ -35,6 +36,41 @@ pub struct WideBoolF32x4(pub wide::f32x4);
 impl PrimitiveSimdValue for WideF32x4 {}
 impl PrimitiveSimdValue for WideBoolF32x4 {}
 
+impl WideF32x4 {
+    #[inline(always)]
+    fn into_arr(self) -> [f32; 4] {
+        self.0.into()
+    }
+
+    #[inline(always)]
+    fn map(self, f: impl Fn(f32) -> f32) -> Self {
+        let arr = self.into_arr();
+        Self::from([f(arr[0]), f(arr[1]), f(arr[2]), f(arr[3])])
+    }
+
+    #[inline(always)]
+    fn zip_map(self, rhs: Self, f: impl Fn(f32, f32) -> f32) -> Self {
+        let arr = self.into_arr();
+        let rhs = rhs.into_arr();
+        Self::from([
+            f(arr[0], rhs[0]),
+            f(arr[1], rhs[1]),
+            f(arr[2], rhs[2]),
+            f(arr[3], rhs[3]),
+        ])
+    }
+}
+
+impl WideBoolF32x4 {
+    fn from_arr(arr: [f32; 4]) -> Self {
+        Self(arr.into())
+    }
+
+    fn into_arr(self) -> [f32; 4] {
+        self.0.into()
+    }
+}
+
 impl SimdValue for WideF32x4 {
     type Element = f32;
     type SimdBool = WideBoolF32x4;
@@ -46,32 +82,36 @@ impl SimdValue for WideF32x4 {
 
     #[inline(always)]
     fn splat(val: Self::Element) -> Self {
-        WideF32x4(wide::f32x4::new(val, val, val, val))
+        WideF32x4(wide::f32x4::from(val))
     }
 
     #[inline(always)]
     fn extract(&self, i: usize) -> Self::Element {
-        self.0.as_ref()[i]
+        self.into_arr()[i]
     }
 
     #[inline(always)]
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element {
-        *self.0.as_ref().get_unchecked(i)
+        *self.into_arr().get_unchecked(i)
     }
 
     #[inline(always)]
     fn replace(&mut self, i: usize, val: Self::Element) {
-        self.0.as_mut()[i] = val;
+        let mut arr = self.into_arr();
+        arr[i] = val;
+        *self = Self::from(arr);
     }
 
     #[inline(always)]
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
-        *self.0.as_mut().get_unchecked_mut(i) = val;
+        let mut arr = self.into_arr();
+        *arr.get_unchecked_mut(i) = val;
+        *self = Self::from(arr);
     }
 
     #[inline(always)]
     fn select(self, cond: Self::SimdBool, other: Self) -> Self {
-        WideF32x4(cond.0.merge(self.0, other.0))
+        WideF32x4(cond.0.blend(self.0, other.0))
     }
 }
 
@@ -88,54 +128,54 @@ impl SimdValue for WideBoolF32x4 {
     fn splat(val: bool) -> Self {
         let results = [
             WideBoolF32x4(wide::f32x4::ZERO),
-            WideBoolF32x4(wide::f32x4::ALL_BITS_ACTIVE),
+            WideBoolF32x4(!wide::f32x4::ZERO),
         ];
         results[val as usize]
     }
 
     #[inline(always)]
     fn extract(&self, i: usize) -> Self::Element {
-        self.0.as_ref()[i] != 0.0
+        self.into_arr()[i] != 0.0
     }
 
     #[inline(always)]
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element {
-        *self.0.as_ref().get_unchecked(i) != 0.0
+        *self.into_arr().get_unchecked(i) != 0.0
     }
 
     #[inline(always)]
     fn replace(&mut self, i: usize, val: Self::Element) {
         let vals = [0.0f32, f32::from_bits(std::u32::MAX)];
-        self.0.as_mut()[i] = vals[val as usize];
+        let mut arr = self.into_arr();
+        arr[i] = vals[val as usize];
+        *self = Self::from_arr(arr);
     }
 
     #[inline(always)]
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
         let vals = [0.0f32, f32::from_bits(std::u32::MAX)];
-        *self.0.as_mut().get_unchecked_mut(i) = vals[val as usize];
+        let mut arr = self.into_arr();
+        *arr.get_unchecked_mut(i) = vals[val as usize];
+        *self = Self::from_arr(arr);
     }
 
     #[inline(always)]
     fn select(self, cond: Self::SimdBool, other: Self) -> Self {
-        WideBoolF32x4(cond.0.merge(self.0, other.0))
+        WideBoolF32x4(cond.0.blend(self.0, other.0))
     }
 }
 
 impl PartialEq for WideF32x4 {
     #[inline]
     fn eq(&self, rhs: &Self) -> bool {
-        let hack_a = wide::ConstUnionHack_f32x4 { wide_thing: self.0 };
-        let hack_b = wide::ConstUnionHack_f32x4 { wide_thing: rhs.0 };
-        unsafe { hack_a.u == hack_b.u }
+        self.0 == rhs.0
     }
 }
 
 impl PartialEq for WideBoolF32x4 {
     #[inline]
     fn eq(&self, rhs: &Self) -> bool {
-        let hack_a = wide::ConstUnionHack_f32x4 { wide_thing: self.0 };
-        let hack_b = wide::ConstUnionHack_f32x4 { wide_thing: rhs.0 };
-        unsafe { hack_a.u == hack_b.u }
+        self.0 == rhs.0
     }
 }
 
@@ -178,7 +218,7 @@ impl BitAnd for WideBoolF32x4 {
 impl SimdBool for WideBoolF32x4 {
     #[inline(always)]
     fn bitmask(self) -> u64 {
-        let arr = self.0.as_ref();
+        let arr = self.into_arr();
         (((arr[0] != 0.0) as u64) << 0)
             | (((arr[1] != 0.0) as u64) << 1)
             | (((arr[2] != 0.0) as u64) << 2)
@@ -187,25 +227,25 @@ impl SimdBool for WideBoolF32x4 {
 
     #[inline(always)]
     fn and(self) -> bool {
-        let arr = self.0.as_ref();
+        let arr = self.into_arr();
         (arr[0].to_bits() & arr[1].to_bits() & arr[2].to_bits() & arr[3].to_bits()) != 0
     }
 
     #[inline(always)]
     fn or(self) -> bool {
-        let arr = self.0.as_ref();
+        let arr = self.into_arr();
         (arr[0].to_bits() | arr[1].to_bits() | arr[2].to_bits() | arr[3].to_bits()) != 0
     }
 
     #[inline(always)]
     fn xor(self) -> bool {
-        let arr = self.0.as_ref();
+        let arr = self.into_arr();
         (arr[0].to_bits() ^ arr[1].to_bits() ^ arr[2].to_bits() ^ arr[3].to_bits()) != 0
     }
 
     #[inline(always)]
     fn all(self) -> bool {
-        self == Self(wide::f32x4::ALL_BITS_ACTIVE)
+        self == Self(!wide::f32x4::ZERO)
     }
 
     #[inline(always)]
@@ -297,14 +337,14 @@ impl_scalar_subset_of_simd!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, 
 impl From<[f32; 4]> for WideF32x4 {
     #[inline(always)]
     fn from(vals: [f32; 4]) -> Self {
-        WideF32x4(wide::f32x4::new(vals[0], vals[1], vals[2], vals[3]))
+        WideF32x4(wide::f32x4::from(vals))
     }
 }
 
 impl From<WideF32x4> for [f32; 4] {
     #[inline(always)]
     fn from(val: WideF32x4) -> [f32; 4] {
-        *val.0.as_ref()
+        val.0.into()
     }
 }
 
@@ -334,12 +374,12 @@ impl From<[bool; 4]> for WideBoolF32x4 {
     #[inline(always)]
     fn from(vals: [bool; 4]) -> Self {
         let bits = [0.0f32, f32::from_bits(std::u32::MAX)];
-        WideBoolF32x4(wide::f32x4::new(
+        WideBoolF32x4(wide::f32x4::from([
             bits[vals[0] as usize],
             bits[vals[1] as usize],
             bits[vals[2] as usize],
             bits[vals[3] as usize],
-        ))
+        ]))
     }
 }
 
@@ -496,7 +536,7 @@ impl Rem<WideF32x4> for WideF32x4 {
 
     #[inline(always)]
     fn rem(self, rhs: Self) -> Self {
-        Self(self.0 % rhs.0)
+        self.zip_map(rhs, |a, b| a % b)
     }
 }
 
@@ -531,7 +571,7 @@ impl MulAssign<WideF32x4> for WideF32x4 {
 impl RemAssign<WideF32x4> for WideF32x4 {
     #[inline(always)]
     fn rem_assign(&mut self, rhs: Self) {
-        self.0 %= rhs.0
+        *self = *self % rhs;
     }
 }
 
@@ -577,18 +617,18 @@ impl SimdPartialOrd for WideF32x4 {
 
     #[inline(always)]
     fn simd_clamp(self, min: Self, max: Self) -> Self {
-        WideF32x4(self.0.clamp(min.0, max.0))
+        self.simd_min(max).simd_max(min)
     }
 
     #[inline(always)]
     fn simd_horizontal_min(self) -> Self::Element {
-        let arr = self.0.as_ref();
+        let arr = self.into_arr();
         arr[0].min(arr[1]).min(arr[2]).min(arr[3])
     }
 
     #[inline(always)]
     fn simd_horizontal_max(self) -> Self::Element {
-        let arr = self.0.as_ref();
+        let arr = self.into_arr();
         arr[0].max(arr[1]).max(arr[2]).max(arr[3])
     }
 }
@@ -615,7 +655,8 @@ impl SimdSigned for WideF32x4 {
 
     #[inline(always)]
     fn simd_signum(&self) -> Self {
-        WideF32x4(self.0.signum())
+        // FIXME: is there a more efficient way?
+        self.map(|x| x.signum())
     }
 
     #[inline(always)]
@@ -639,8 +680,8 @@ impl SimdRealField for WideF32x4 {
 
     #[inline(always)]
     fn simd_copysign(self, sign: Self) -> Self {
-        // WideF32x4(self.0.copysign(to.0))
-        WideF32x4((wide::f32x4::NEGATIVE_ZERO & sign.0) | ((!wide::f32x4::NEGATIVE_ZERO) & self.0))
+        let neg_zero = wide::f32x4::from(-0.0);
+        WideF32x4((neg_zero & sign.0) | ((!neg_zero) & self.0))
     }
 
     #[inline(always)]
@@ -765,7 +806,7 @@ impl SimdComplexField for WideF32x4 {
     #[inline(always)]
     fn simd_to_exp(self) -> (Self::SimdRealField, Self) {
         let ge = self.0.cmp_ge(Self::one().0);
-        let exp = ge.merge(Self::one().0, -Self::one().0);
+        let exp = ge.blend(Self::one().0, -Self::one().0);
         (WideF32x4(self.0 * exp), WideF32x4(exp))
     }
 
