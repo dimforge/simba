@@ -630,13 +630,13 @@ macro_rules! impl_float_simd(
             }
 
             #[inline(always)]
-            fn simd_copysign(self, to: Self) -> Self {
+            fn simd_copysign(self, sign: Self) -> Self {
                 use packed_simd::FromBits;
                 let sign_bits = <$int>::from_bits(<$t>::splat(-0.0));
+                let ref_bits = <$int>::from_bits(sign.0);
                 let self_bits = <$int>::from_bits(self.0);
-                let to_bits = <$int>::from_bits(to.0);
                 let result =
-                    <$t>::from_bits((sign_bits & self_bits) | ((!sign_bits) & to_bits));
+                    <$t>::from_bits((sign_bits & ref_bits) | ((!sign_bits) & self_bits));
                 Simd(result)
             }
 

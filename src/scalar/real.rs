@@ -67,9 +67,8 @@ macro_rules! impl_real(
             }
 
             #[inline(always)]
-            fn copysign(self, to: Self) -> Self {
-                let signbit = (-0.0 as $T).to_bits();
-                Self::from_bits((signbit & self.to_bits()) | ((!signbit) & to.to_bits()))
+            fn copysign(self, sign: Self) -> Self {
+                self.copysign(sign)
             }
 
             #[inline]

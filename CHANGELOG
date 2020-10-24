@@ -1,3 +1,12 @@
+## Release v0.3.0
+This release includes a change that is not technically a breaking change because
+it won't cause existing code to not compile anymore. However it is an important
+semantic change to justify a major release:
+- The arguments of `copysign` are now swapped: `a.copysign(b)` will copy the sign of `b` into `a` (the previous
+  behavior copied the sign of `a` into `b`). This change was needed to align with the argument order used by
+  the standard library, thus avoiding hard-to-debug errors due to mismatching conventions.
+- The arguments of `simd_copysign` are now swapped too.
+
 ## Release v0.2.4
 - Make `Fixed.to_bits` and `Fixed::from_bits` const-fn.
 - Make our `Fixed` wrapper type `repr(transparent)`.
