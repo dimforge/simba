@@ -6,9 +6,13 @@ description = "SIMD algebra for Rust"
 keywords = ["algebra", "simd", "math"]
 readme = "README.md"
 repository = "https://github.com/dimforge/simba"
+categories = [ "science", "mathematics", "wasm", "no standard library" ]
 documentation = "https://docs.rs/simba"
 license = "Apache-2.0"
 edition = "2018"
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 [features]
 default = [ "std" ]
