@@ -756,6 +756,16 @@ macro_rules! impl_float_simd(
             type SimdRealField = Self;
 
             #[inline(always)]
+            fn simd_horizontal_sum(self) -> Self::Element {
+                self.0.iter().sum()
+            }
+
+            #[inline(always)]
+            fn simd_horizontal_product(self) -> Self::Element {
+                self.0.iter().product()
+            }
+
+            #[inline(always)]
             fn from_simd_real(re: Self::SimdRealField) -> Self {
                 re
             }
@@ -1010,6 +1020,20 @@ macro_rules! impl_float_simd(
         #[cfg(any(feature = "std", feature = "libm", feature = "libm_force"))]
         impl SimdComplexField for num_complex::Complex<AutoSimd<$t>> {
             type SimdRealField = AutoSimd<$t>;
+
+            #[inline(always)]
+            fn simd_horizontal_sum(self) -> Self::Element {
+                num_complex::Complex::new(self.re.simd_horizontal_sum(), self.im.simd_horizontal_sum())
+            }
+
+            #[inline(always)]
+            fn simd_horizontal_product(self) -> Self::Element {
+                let mut prod = self.extract(0);
+                for ii in 1..$lanes {
+                    prod = prod * self.extract(ii)
+                }
+                prod
+            }
 
             #[inline]
             fn from_simd_real(re: Self::SimdRealField) -> Self {
