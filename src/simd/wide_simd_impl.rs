@@ -769,6 +769,16 @@ impl SimdComplexField for WideF32x4 {
     type SimdRealField = Self;
 
     #[inline(always)]
+    fn simd_horizontal_sum(self) -> Self::Element {
+        self.0.reduce_add()
+    }
+
+    #[inline(always)]
+    fn simd_horizontal_product(self) -> Self::Element {
+        (self.extract(0) * self.extract(1)) * (self.extract(2) * self.extract(3))
+    }
+
+    #[inline(always)]
     fn from_simd_real(re: Self::SimdRealField) -> Self {
         re
     }
@@ -1021,6 +1031,20 @@ impl SimdComplexField for WideF32x4 {
 // so easily.
 impl SimdComplexField for num_complex::Complex<WideF32x4> {
     type SimdRealField = WideF32x4;
+
+    #[inline(always)]
+    fn simd_horizontal_sum(self) -> Self::Element {
+        num_complex::Complex::new(self.re.simd_horizontal_sum(), self.im.simd_horizontal_sum())
+    }
+
+    #[inline(always)]
+    fn simd_horizontal_product(self) -> Self::Element {
+        let mut prod = self.extract(0);
+        for ii in 1..Self::lanes() {
+            prod = prod * self.extract(ii)
+        }
+        prod
+    }
 
     #[inline]
     fn from_simd_real(re: Self::SimdRealField) -> Self {

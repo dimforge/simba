@@ -31,6 +31,12 @@ pub trait SimdComplexField:
     /// Type of the coefficients of a complex number.
     type SimdRealField: SimdRealField<SimdBool = <Self as SimdValue>::SimdBool>;
     complex_trait_methods!(SimdRealField, simd_);
+
+    /// Computes the sum of all the lanes of `self`.
+    fn simd_horizontal_sum(self) -> Self::Element;
+
+    /// Computes the product of all the lanes of `self`.
+    fn simd_horizontal_product(self) -> Self::Element;
 }
 
 // Blanket impl: ComplexField => SimdComplexField
@@ -254,5 +260,14 @@ impl<T: ComplexField> SimdComplexField for T {
     #[inline(always)]
     fn simd_cbrt(self) -> Self {
         self.cbrt()
+    }
+
+    #[inline(always)]
+    fn simd_horizontal_sum(self) -> Self::Element {
+        self
+    }
+    #[inline(always)]
+    fn simd_horizontal_product(self) -> Self::Element {
+        self
     }
 }
