@@ -1,3 +1,8 @@
+## Release v0.4.0
+- Update the `rand` 0.8 dependency.
+- Add `SimdComplexField::simd_horizontal_sum` and `SimdComplexField::simd_horizontal_product`
+  for computing the sum or product of all the lanes of a single SIMD value.
+
 ## Release v0.3.0
 This release includes a change that is not technically a breaking change because
 it won't cause existing code to not compile anymore. However it is an important
