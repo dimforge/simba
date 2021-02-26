@@ -31,7 +31,7 @@ wide        = { version = "0.6", optional = true }
 fixed       = { version = "1", optional = true }
 cordic      = { version = "0.1", optional = true }
 paste       = "1.0"
-rand        = { version = "0.7", optional = true }
+rand        = { version = "0.8", optional = true }
 serde       = { version = "1", default-features = false, optional = true }
 libm_force  = { package = "libm", version = "0.2", optional = true }
 
