@@ -6,7 +6,7 @@ description = "SIMD algebra for Rust"
 keywords = ["algebra", "simd", "math"]
 readme = "README.md"
 repository = "https://github.com/dimforge/simba"
-categories = [ "science", "mathematics", "wasm", "no standard library" ]
+categories = [ "science", "mathematics", "wasm", "no-std" ]
 documentation = "https://docs.rs/simba"
 license = "Apache-2.0"
 edition = "2018"
@@ -25,7 +25,7 @@ libm = [ "num-traits/libm" ]
 num-traits  = { version = "0.2.11", default-features = false }
 approx      = { version = "0.4", default-features = false }
 decimal     = { version = "2.0", default-features = false, optional = true }
-num-complex = { version = "0.3", default-features = false }
+num-complex = { version = "0.4", default-features = false }
 packed_simd = { package = "packed_simd_2", version = "0.3", features = [ "into_bits" ], optional = true }
 wide        = { version = "0.6", optional = true }
 fixed       = { version = "1", optional = true }

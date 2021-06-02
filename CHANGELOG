@@ -1,3 +1,6 @@
+## Release v0.5.0
+- Update the `num-complex` 0.4 dependency.
+
 ## Release v0.4.0
 - Update the `rand` 0.8 dependency.
 - Add `SimdComplexField::simd_horizontal_sum` and `SimdComplexField::simd_horizontal_product`
