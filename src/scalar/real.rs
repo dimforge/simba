@@ -21,9 +21,9 @@ pub trait RealField:
     + PartialOrd
 {
     /// Is the sign of this real number positive?
-    fn is_sign_positive(self) -> bool;
+    fn is_sign_positive(&self) -> bool;
     /// Is the sign of this real number negative?
-    fn is_sign_negative(self) -> bool;
+    fn is_sign_negative(&self) -> bool;
     /// Copies the sign of `self` to `to`.
     ///
     /// - Returns `to.simd_abs()` if `self` is positive or positive-zero.
@@ -57,13 +57,13 @@ macro_rules! impl_real(
     ($($T:ty, $M:ident, $libm: ident);*) => ($(
         impl RealField for $T {
             #[inline]
-            fn is_sign_positive(self) -> bool {
-                $M::is_sign_positive(self)
+            fn is_sign_positive(&self) -> bool {
+                $M::is_sign_positive(*self)
             }
 
             #[inline]
-            fn is_sign_negative(self) -> bool {
-                $M::is_sign_negative(self)
+            fn is_sign_negative(&self) -> bool {
+                $M::is_sign_negative(*self)
             }
 
             #[inline(always)]

@@ -1,0 +1,53 @@
+name: Simba CI build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-fmt:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Check formatting
+      run: cargo fmt -- --check
+  build-native:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build --no-default-feature
+      run: cargo build --no-default-features;
+    - name: Build (default features)
+      run: cargo build;
+    - name: Build --features wide
+      run: cargo build --features wide;
+    - name: Build --features partial_fixed_point_support
+      run: cargo build --features partial_fixed_point_support;
+  build-wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: rustup target add wasm32-unknown-unknown
+      - name: build
+        run: cargo build --verbose --target wasm32-unknown-unknown;
+  build-no-std:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt
+      - name: install xargo
+        run: cp .github/Xargo.toml .; rustup component add rust-src; cargo install -f xargo;
+      - name: build x86_64-unknown-linux-gnu
+        run: xargo build --verbose --no-default-features --target=x86_64-unknown-linux-gnu;
+      - name: build x86_64-unknown-linux-gnu --features libm
+        run: xargo build --verbose --no-default-features --features libm --target=x86_64-unknown-linux-gnu;
