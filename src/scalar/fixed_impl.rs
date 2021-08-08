@@ -415,13 +415,13 @@ macro_rules! impl_fixed_type(
         }
 
         impl<Fract: $LeEqDim> std::fmt::Debug for $FixedI<Fract> {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 self.0.fmt(f)
             }
         }
 
         impl<Fract: $LeEqDim> std::fmt::Display for $FixedI<Fract> {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 self.0.fmt(f)
             }
         }

@@ -145,7 +145,7 @@ impl SimdValue for WideBoolF32x4 {
 
     #[inline(always)]
     fn replace(&mut self, i: usize, val: Self::Element) {
-        let vals = [0.0f32, f32::from_bits(std::u32::MAX)];
+        let vals = [0.0f32, f32::from_bits(u32::MAX)];
         let mut arr = self.into_arr();
         arr[i] = vals[val as usize];
         *self = Self::from_arr(arr);
@@ -153,7 +153,7 @@ impl SimdValue for WideBoolF32x4 {
 
     #[inline(always)]
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
-        let vals = [0.0f32, f32::from_bits(std::u32::MAX)];
+        let vals = [0.0f32, f32::from_bits(u32::MAX)];
         let mut arr = self.into_arr();
         *arr.get_unchecked_mut(i) = vals[val as usize];
         *self = Self::from_arr(arr);
@@ -217,6 +217,7 @@ impl BitAnd for WideBoolF32x4 {
 
 impl SimdBool for WideBoolF32x4 {
     #[inline(always)]
+    #[allow(clippy::identity_op)]
     fn bitmask(self) -> u64 {
         let arr = self.into_arr();
         (((arr[0] != 0.0) as u64) << 0)
@@ -324,7 +325,7 @@ macro_rules! impl_scalar_subset_of_simd(
             fn is_in_subset(c: &WideF32x4) -> bool {
                 let elt0 = c.extract(0);
                 <$t as SubsetOf<f32>>::is_in_subset(&elt0) &&
-                (1..4).all(|i| c.extract(i) == elt0)
+                (1..4).all(|i| (c.extract(i) - elt0).abs() < f32::EPSILON)
             }
         }
     )*}
@@ -373,7 +374,7 @@ impl SubsetOf<WideF32x4> for WideF32x4 {
 impl From<[bool; 4]> for WideBoolF32x4 {
     #[inline(always)]
     fn from(vals: [bool; 4]) -> Self {
-        let bits = [0.0f32, f32::from_bits(std::u32::MAX)];
+        let bits = [0.0f32, f32::from_bits(u32::MAX)];
         WideBoolF32x4(wide::f32x4::from([
             bits[vals[0] as usize],
             bits[vals[1] as usize],
@@ -416,16 +417,6 @@ impl Num for WideF32x4 {
 
 impl FromPrimitive for WideF32x4 {
     #[inline(always)]
-    fn from_i64(n: i64) -> Option<Self> {
-        f32::from_i64(n).map(Self::splat)
-    }
-
-    #[inline(always)]
-    fn from_u64(n: u64) -> Option<Self> {
-        f32::from_u64(n).map(Self::splat)
-    }
-
-    #[inline(always)]
     fn from_isize(n: isize) -> Option<Self> {
         f32::from_isize(n).map(Self::splat)
     }
@@ -446,6 +437,11 @@ impl FromPrimitive for WideF32x4 {
     }
 
     #[inline(always)]
+    fn from_i64(n: i64) -> Option<Self> {
+        f32::from_i64(n).map(Self::splat)
+    }
+
+    #[inline(always)]
     fn from_usize(n: usize) -> Option<Self> {
         f32::from_usize(n).map(Self::splat)
     }
@@ -463,6 +459,11 @@ impl FromPrimitive for WideF32x4 {
     #[inline(always)]
     fn from_u32(n: u32) -> Option<Self> {
         f32::from_u32(n).map(Self::splat)
+    }
+
+    #[inline(always)]
+    fn from_u64(n: u64) -> Option<Self> {
+        f32::from_u64(n).map(Self::splat)
     }
 
     #[inline(always)]
@@ -674,14 +675,14 @@ impl Field for WideF32x4 {}
 
 impl SimdRealField for WideF32x4 {
     #[inline(always)]
-    fn simd_atan2(self, other: Self) -> Self {
-        self.zip_map_lanes(other, |a, b| a.atan2(b))
-    }
-
-    #[inline(always)]
     fn simd_copysign(self, sign: Self) -> Self {
         let neg_zero = wide::f32x4::from(-0.0);
         WideF32x4((neg_zero & sign.0) | ((!neg_zero) & self.0))
+    }
+
+    #[inline(always)]
+    fn simd_atan2(self, other: Self) -> Self {
+        self.zip_map_lanes(other, |a, b| a.atan2(b))
     }
 
     #[inline(always)]
@@ -1041,7 +1042,7 @@ impl SimdComplexField for num_complex::Complex<WideF32x4> {
     fn simd_horizontal_product(self) -> Self::Element {
         let mut prod = self.extract(0);
         for ii in 1..Self::lanes() {
-            prod = prod * self.extract(ii)
+            prod *= self.extract(ii)
         }
         prod
     }
@@ -1138,8 +1139,8 @@ impl SimdComplexField for num_complex::Complex<WideF32x4> {
 
     #[inline]
     fn simd_exp2(self) -> Self {
-        let _2 = WideF32x4::one() + WideF32x4::one();
-        num_complex::Complex::new(_2, WideF32x4::zero()).simd_powc(self)
+        let _two = WideF32x4::one() + WideF32x4::one();
+        num_complex::Complex::new(_two, WideF32x4::zero()).simd_powc(self)
     }
 
     #[inline]
@@ -1154,14 +1155,14 @@ impl SimdComplexField for num_complex::Complex<WideF32x4> {
 
     #[inline]
     fn simd_log2(self) -> Self {
-        let _2 = WideF32x4::one() + WideF32x4::one();
-        self.simd_log(_2)
+        let _two = WideF32x4::one() + WideF32x4::one();
+        self.simd_log(_two)
     }
 
     #[inline]
     fn simd_log10(self) -> Self {
-        let _10 = WideF32x4::from_subset(&10.0f64);
-        self.simd_log(_10)
+        let _ten = WideF32x4::from_subset(&10.0f64);
+        self.simd_log(_ten)
     }
 
     #[inline]

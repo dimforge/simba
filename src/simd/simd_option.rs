@@ -43,7 +43,7 @@ impl<V: SimdValue> SimdOption<V> {
         &self.val
     }
 
-    /// Converts this SIMD option to a strandard Option.
+    /// Converts this SIMD option to a standard Option.
     ///
     /// If all the bits of `self.mask` are 1, then this returns `Some(self.value())`.
     /// If any bit of `self.mask` is 0, then this returns `None`.
