@@ -1,3 +1,8 @@
+## Release v0.6.0
+- Replace all the `Copy` trait bounds by `Clone`, allowing more types to fulfill the requirements
+  of `ComplexField` and `RealField`.
+- The `ComplexField` trait no longer derive from `FromPrimitive`.
+
 ## Release v0.5.0
 - Update the `num-complex` 0.4 dependency.
 
@@ -15,7 +20,7 @@ semantic change to justify a major release:
   the standard library, thus avoiding hard-to-debug errors due to mismatching conventions.
 - The arguments of `simd_copysign` are now swapped too.
 
-This release also updatse the `num-complex` dependency to its latest version 0.3.
+This release also update the `num-complex` dependency to its latest version 0.3.
 
 ## Release v0.2.4
 - Make `Fixed.to_bits` and `Fixed::from_bits` const-fn.
