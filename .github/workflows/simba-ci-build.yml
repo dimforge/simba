@@ -1,4 +1,4 @@
-name: Rapier CI build
+name: Simba CI build
 
 on:
   push:
