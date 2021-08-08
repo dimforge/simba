@@ -782,12 +782,12 @@ macro_rules! impl_fixed_type(
                     + IsLessOrEqual<$LeEqDim3, Output = True>
                     + IsLessOrEqual<$LeEqDim4, Output = True> {
             #[inline]
-            fn is_sign_positive(self) -> bool {
+            fn is_sign_positive(&self) -> bool {
                 self.0.is_positive()
             }
 
             #[inline]
-            fn is_sign_negative(self) -> bool {
+            fn is_sign_negative(&self) -> bool {
                 self.0.is_negative()
             }
 

@@ -1422,7 +1422,7 @@ macro_rules! impl_float_simd(
 
 #[inline]
 fn simd_complex_from_polar<N: SimdRealField>(r: N, theta: N) -> num_complex::Complex<N> {
-    num_complex::Complex::new(r * theta.simd_cos(), r * theta.simd_sin())
+    num_complex::Complex::new(r.clone() * theta.clone().simd_cos(), r * theta.simd_sin())
 }
 
 impl_float_simd!(
