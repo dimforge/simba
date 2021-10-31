@@ -1,3 +1,10 @@
+## Release v0.7.0
+- Remove the `Bounded` requirement from `RealField`. Replace it by methods returning `Option<Self>` so that they can
+  still be implemented by unbounded types (by returning `None`).
+- The `ComplexField` trait derives  from `FromPrimitive` again. We can actually keep this because all its methods
+  return `Option<Self>`, meaning that it could be implemented by any type.
+
+
 ## Release v0.6.0
 - Replace all the `Copy` trait bounds by `Clone`, allowing more types to fulfill the requirements
   of `ComplexField` and `RealField`.
