@@ -1,4 +1,4 @@
-use num::{Bounded, Signed};
+use num::Signed;
 use std::{f32, f64};
 
 use approx::{RelativeEq, UlpsEq};
@@ -17,7 +17,6 @@ pub trait RealField:
     + RelativeEq<Epsilon = Self>
     + UlpsEq<Epsilon = Self>
     + Signed
-    + Bounded
     + PartialOrd
 {
     /// Is the sign of this real number positive?
@@ -34,6 +33,11 @@ pub trait RealField:
     fn min(self, other: Self) -> Self;
     fn clamp(self, min: Self, max: Self) -> Self;
     fn atan2(self, other: Self) -> Self;
+
+    /// The smallest finite positive value representable using this type.
+    fn min_value() -> Option<Self>;
+    /// The largest finite positive value representable using this type.
+    fn max_value() -> Option<Self>;
 
     fn pi() -> Self;
     fn two_pi() -> Self;
@@ -95,6 +99,19 @@ macro_rules! impl_real(
             #[inline]
             fn atan2(self, other: Self) -> Self {
                 $libm::atan2(self, other)
+            }
+
+
+            /// The smallest finite positive value representable using this type.
+            #[inline]
+            fn min_value() -> Option<Self> {
+                Some($M::MIN)
+            }
+
+            /// The largest finite positive value representable using this type.
+            #[inline]
+            fn max_value() -> Option<Self> {
+                Some($M::MAX)
             }
 
             /// Archimedes' constant.

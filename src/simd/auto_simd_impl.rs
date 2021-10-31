@@ -8,7 +8,6 @@ use crate::simd::{
     PrimitiveSimdValue, SimdBool, SimdComplexField, SimdPartialOrd, SimdRealField, SimdSigned,
     SimdValue,
 };
-use approx::AbsDiffEq;
 #[cfg(feature = "decimal")]
 use decimal::d128;
 use num::{FromPrimitive, Num, One, Zero};
