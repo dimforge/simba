@@ -834,6 +834,16 @@ macro_rules! impl_fixed_type(
                 Self(cordic::atan2(self.0, other.0))
             }
 
+            #[inline]
+            fn min_value() -> Option<Self> {
+                Some(Bounded::min_value())
+            }
+
+            #[inline]
+            fn max_value() -> Option<Self> {
+                Some(Bounded::max_value())
+            }
+
             /// Archimedes' constant.
             #[inline]
             fn pi() -> Self {
