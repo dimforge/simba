@@ -1,4 +1,5 @@
 use num::{One, Signed, Zero};
+use num_traits::FromPrimitive;
 use std::any::Any;
 use std::fmt::{Debug, Display};
 use std::ops::Neg;
@@ -161,6 +162,7 @@ macro_rules! complex_trait_methods(
 pub trait ComplexField:
     SubsetOf<Self>
     + SupersetOf<f64>
+    + FromPrimitive
     + Field<Element = Self, SimdBool = bool>
     + Neg<Output = Self>
     + Clone
