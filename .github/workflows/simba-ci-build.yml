@@ -44,7 +44,6 @@ jobs:
         with:
           toolchain: nightly
           override: true
-          components: rustfmt
       - name: install xargo
         run: cp .github/Xargo.toml .; rustup component add rust-src; cargo install -f xargo;
       - name: build x86_64-unknown-linux-gnu
@@ -55,6 +54,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: Jimver/cuda-toolkit@v0.2.4
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
       - uses: actions/checkout@v2
       - run: rustup target add nvptx64-nvidia-cuda
       - run: cargo build --no-default-features --features cuda
