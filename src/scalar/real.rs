@@ -65,7 +65,7 @@ pub trait RealField:
 }
 
 macro_rules! impl_real(
-    ($($T:ty, $M:ident, $libm: ident);*) => ($(
+    ($($T:ty, $M:ident, $cpysgn_mod: ident, $atan_mod: ident);*) => ($(
         impl RealField for $T {
             #[inline]
             fn is_sign_positive(&self) -> bool {
@@ -79,7 +79,7 @@ macro_rules! impl_real(
 
             #[inline(always)]
             fn copysign(self, sign: Self) -> Self {
-                $libm::copysign(self, sign)
+                $cpysgn_mod::copysign(self, sign)
             }
 
             #[inline]
@@ -105,7 +105,7 @@ macro_rules! impl_real(
 
             #[inline]
             fn atan2(self, other: Self) -> Self {
-                $libm::atan2(self, other)
+                $atan_mod::atan2(self, other)
             }
 
 
@@ -222,9 +222,9 @@ macro_rules! impl_real(
     not(feature = "libm_force"),
     feature = "libm"
 ))]
-impl_real!(f32, f32, Float; f64, f64, Float);
+impl_real!(f32, f32, f32, Float; f64, f64, f64, Float);
 #[cfg(all(feature = "std", not(feature = "libm_force")))]
-impl_real!(f32, f32, f32; f64, f64, f64);
+impl_real!(f32, f32, f32, f32; f64, f64, f64, f64);
 #[cfg(all(
     any(target_arch = "nvptx", target_arch = "nvptx64"),
     not(feature = "std"),
@@ -232,11 +232,11 @@ impl_real!(f32, f32, f32; f64, f64, f64);
     feature = "cuda"
 ))]
 impl_real!(
-    f32, f32, GpuFloat;
-    f64, f64, GpuFloat
+    f32, f32, GpuFloat, GpuFloat;
+    f64, f64, GpuFloat, GpuFloat
 );
 #[cfg(feature = "libm_force")]
-impl_real!(f32, f32, libm_force_f32; f64, f64, libm_force);
+impl_real!(f32, f32, libm_force_f32, libm_force_f32; f64, f64, libm_force, libm_force);
 
 // We use this dummy module to remove the 'f' suffix at the end of
 // each libm functions to make our generic Real/ComplexField impl
