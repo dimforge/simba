@@ -5,6 +5,13 @@ use approx::{RelativeEq, UlpsEq};
 
 use crate::scalar::ComplexField;
 
+#[cfg(all(
+    any(target_arch = "nvptx", target_arch = "nvptx64"),
+    not(feature = "std"),
+    not(feature = "libm_force"),
+    feature = "cuda"
+))]
+use cuda_std::GpuFloat;
 #[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 use num::Float;
 //#[cfg(feature = "decimal")]
@@ -23,11 +30,11 @@ pub trait RealField:
     fn is_sign_positive(&self) -> bool;
     /// Is the sign of this real number negative?
     fn is_sign_negative(&self) -> bool;
-    /// Copies the sign of `self` to `to`.
+    /// Copies the sign of `sign` to `self`.
     ///
-    /// - Returns `to.simd_abs()` if `self` is positive or positive-zero.
-    /// - Returns `-to.simd_abs()` if `self` is negative or negative-zero.
-    fn copysign(self, to: Self) -> Self;
+    /// - Returns `self.simd_abs()` if `sign` is positive or positive-zero.
+    /// - Returns `-self.simd_abs()` if `sign` is negative or negative-zero.
+    fn copysign(self, sign: Self) -> Self;
 
     fn max(self, other: Self) -> Self;
     fn min(self, other: Self) -> Self;
@@ -72,7 +79,7 @@ macro_rules! impl_real(
 
             #[inline(always)]
             fn copysign(self, sign: Self) -> Self {
-                self.copysign(sign)
+                $libm::copysign(self, sign)
             }
 
             #[inline]
@@ -208,10 +215,26 @@ macro_rules! impl_real(
     )*)
 );
 
-#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
+#[cfg(all(
+    not(target_arch = "nvptx"),
+    not(target_arch = "nvptx64"),
+    not(feature = "std"),
+    not(feature = "libm_force"),
+    feature = "libm"
+))]
 impl_real!(f32, f32, Float; f64, f64, Float);
 #[cfg(all(feature = "std", not(feature = "libm_force")))]
 impl_real!(f32, f32, f32; f64, f64, f64);
+#[cfg(all(
+    any(target_arch = "nvptx", target_arch = "nvptx64"),
+    not(feature = "std"),
+    not(feature = "libm_force"),
+    feature = "cuda"
+))]
+impl_real!(
+    f32, f32, GpuFloat;
+    f64, f64, GpuFloat
+);
 #[cfg(feature = "libm_force")]
 impl_real!(f32, f32, libm_force_f32; f64, f64, libm_force);
 
@@ -223,6 +246,11 @@ mod libm_force_f32 {
     #[inline(always)]
     pub fn atan2(y: f32, x: f32) -> f32 {
         libm_force::atan2f(y, x)
+    }
+
+    #[inline(always)]
+    pub fn copysign(x: f32, y: f32) -> f32 {
+        libm_force::copysignf(x, y)
     }
 }
 
