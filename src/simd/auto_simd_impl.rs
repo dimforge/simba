@@ -657,7 +657,7 @@ macro_rules! impl_float_simd(
 
         impl Field for AutoSimd<$t> {}
 
-        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force"))]
+        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force", all(any(target_arch = "nvptx", target_arch = "nvptx64"), feature = "cuda")))]
         impl SimdRealField for AutoSimd<$t> {
             #[inline(always)]
             fn simd_atan2(self, other: Self) -> Self {
@@ -751,7 +751,7 @@ macro_rules! impl_float_simd(
             }
         }
 
-        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force"))]
+        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force", all(any(target_arch = "nvptx", target_arch = "nvptx64"), feature = "cuda")))]
         impl SimdComplexField for AutoSimd<$t> {
             type SimdRealField = Self;
 
@@ -1017,7 +1017,7 @@ macro_rules! impl_float_simd(
         // NOTE: most of the impls in there are copy-paste from the implementation of
         // ComplexField for num_complex::Complex. Unfortunately, we can't reuse the implementations
         // so easily.
-        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force"))]
+        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force", all(any(target_arch = "nvptx", target_arch = "nvptx64"), feature = "cuda")))]
         impl SimdComplexField for num_complex::Complex<AutoSimd<$t>> {
             type SimdRealField = AutoSimd<$t>;
 

@@ -6,6 +6,13 @@ use std::ops::Neg;
 use std::{f32, f64};
 
 use crate::scalar::{Field, RealField, SubsetOf, SupersetOf};
+#[cfg(all(
+    any(target_arch = "nvptx", target_arch = "nvptx64"),
+    not(feature = "std"),
+    not(feature = "libm_force"),
+    feature = "cuda"
+))]
+use cuda_std::GpuFloat;
 #[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 use num::Float;
 //#[cfg(feature = "decimal")]
@@ -468,7 +475,13 @@ macro_rules! impl_complex(
     )*)
 );
 
-#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
+#[cfg(all(
+    not(target_arch = "nvptx"),
+    not(target_arch = "nvptx64"),
+    not(feature = "std"),
+    not(feature = "libm_force"),
+    feature = "libm"
+))]
 impl_complex!(
     f32, f32, Float;
     f64, f64, Float
@@ -478,6 +491,17 @@ impl_complex!(
 impl_complex!(
     f32,f32,f32;
     f64,f64,f64
+);
+
+#[cfg(all(
+    any(target_arch = "nvptx", target_arch = "nvptx64"),
+    not(feature = "std"),
+    not(feature = "libm_force"),
+    feature = "cuda"
+))]
+impl_complex!(
+    f32, f32, GpuFloat;
+    f64, f64, GpuFloat
 );
 
 #[cfg(feature = "libm_force")]
