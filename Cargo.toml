@@ -35,7 +35,7 @@ paste       = "1.0"
 rand        = { version = "0.8", optional = true }
 serde       = { version = "1", default-features = false, optional = true }
 libm_force  = { package = "libm", version = "0.2", optional = true }
-cuda_std    = { version = "0.1", optional = true }
+cuda_std    = { version = "0.2", optional = true }
 
 [package.metadata.docs.rs]
 all-features = true
