@@ -1,8 +1,10 @@
-## Release v0.7.0
+## Release v0.7.0 (02 Jan. 2022)
 - Remove the `Bounded` requirement from `RealField`. Replace it by methods returning `Option<Self>` so that they can
   still be implemented by unbounded types (by returning `None`).
 - The `ComplexField` trait derives  from `FromPrimitive` again. We can actually keep this because all its methods
   return `Option<Self>`, meaning that it could be implemented by any type.
+- Add the `cuda` cargo feature that enables support for [Rust-Cuda](https://github.com/Rust-GPU/Rust-CUDA) by generating
+  the relevant cuda intrinsics for float operations when running on a cuda kernel.
 
 
 ## Release v0.6.0
