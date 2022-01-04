@@ -1152,8 +1152,8 @@ impl<N: RealField + PartialOrd> ComplexField for num_complex::Complex<N> {
 
     #[inline]
     fn exp2(self) -> Self {
-        let _2 = N::one() + N::one();
-        num_complex::Complex::new(_2, N::zero()).powc(self)
+        let _two = N::one() + N::one();
+        num_complex::Complex::new(_two, N::zero()).powc(self)
     }
 
     #[inline]
@@ -1168,14 +1168,14 @@ impl<N: RealField + PartialOrd> ComplexField for num_complex::Complex<N> {
 
     #[inline]
     fn log2(self) -> Self {
-        let _2 = N::one() + N::one();
-        self.log(_2)
+        let _two = N::one() + N::one();
+        self.log(_two)
     }
 
     #[inline]
     fn log10(self) -> Self {
-        let _10 = N::from_subset(&10.0f64);
-        self.log(_10)
+        let _ten = N::from_subset(&10.0f64);
+        self.log(_ten)
     }
 
     #[inline]

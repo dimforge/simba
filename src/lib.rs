@@ -26,11 +26,16 @@ However, the SIMD traits won't be implemented for any SIMD types. Therefore it i
 - Use the `wide` feature if you only need 4-lanes 32-bits floats, and can't afford to use a nightly compiler.
 */
 
-#![deny(non_camel_case_types)]
-#![deny(unused_parens)]
-#![deny(non_upper_case_globals)]
-#![deny(unused_results)]
-#![deny(missing_docs)] // FIXME: should be denied
+#![deny(
+    rust_2018_compatibility,
+    rust_2018_idioms,
+    future_incompatible,
+    nonstandard_style,
+    unused_parens,
+    unused_results,
+    missing_docs,
+    clippy::all
+)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(not(feature = "std"))]

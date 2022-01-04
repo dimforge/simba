@@ -1030,7 +1030,7 @@ macro_rules! impl_float_simd(
             fn simd_horizontal_product(self) -> Self::Element {
                 let mut prod = self.extract(0);
                 for ii in 1..$lanes {
-                    prod = prod * self.extract(ii)
+                    prod *= self.extract(ii)
                 }
                 prod
             }
