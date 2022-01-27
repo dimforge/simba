@@ -1,3 +1,6 @@
+## Release v0.7.1 (27 Jan. 2022)
+- Add the optional types `WideF32x8` and `WideBoolF32x8` for 8-lanes SIMD float operations.
+
 ## Release v0.7.0 (02 Jan. 2022)
 - Remove the `Bounded` requirement from `RealField`. Replace it by methods returning `Option<Self>` so that they can
   still be implemented by unbounded types (by returning `None`).
