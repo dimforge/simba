@@ -222,7 +222,7 @@ macro_rules! impl_real(
     not(feature = "libm_force"),
     feature = "libm"
 ))]
-impl_real!(f32, f32, f32, Float; f64, f64, f64, Float);
+impl_real!(f32, f32, Float, Float; f64, f64, Float, Float);
 #[cfg(all(feature = "std", not(feature = "libm_force")))]
 impl_real!(f32, f32, f32, f32; f64, f64, f64, f64);
 #[cfg(all(
