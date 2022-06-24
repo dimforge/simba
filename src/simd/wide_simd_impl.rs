@@ -10,6 +10,7 @@ use crate::simd::{
 };
 use approx::AbsDiffEq;
 use num::{FromPrimitive, Num, One, Zero};
+use num_traits::Bounded;
 use std::{
     cmp::PartialEq,
     ops::{
@@ -47,25 +48,39 @@ pub struct WideF32x8(pub wide::f32x8);
 #[derive(Copy, Clone, Debug)]
 pub struct WideBoolF32x8(pub wide::f32x8);
 
+/// A wrapper type of `wide::f64x4` that implements all the relevant traits from `num` and `simba`.
+///
+/// This is needed to overcome the orphan rules.
+#[repr(transparent)]
+#[derive(Copy, Clone, Debug)]
+pub struct WideF64x4(pub wide::f64x4);
+
+/// An SIMD boolean structure associated to `wide::f64x4` that implements all the relevant traits from `simba`.
+///
+/// This is needed to overcome the orphan rules.
+#[repr(transparent)]
+#[derive(Copy, Clone, Debug)]
+pub struct WideBoolF64x4(pub wide::f64x4);
+
 macro_rules! impl_wide_f32(
-    ($f32xX: ident, $WideF32xX: ident, $WideBoolF32xX: ident, $lanes: expr; $($ii: expr),+) => {
+    ($f32: ident, $f32xX: ident, $WideF32xX: ident, $WideBoolF32xX: ident, $lanes: expr; $($ii: expr),+) => {
         impl PrimitiveSimdValue for $WideF32xX {}
         impl PrimitiveSimdValue for $WideBoolF32xX {}
 
         impl $WideF32xX {
             #[inline(always)]
-            fn into_arr(self) -> [f32; $lanes] {
+            fn into_arr(self) -> [$f32; $lanes] {
                 self.0.into()
             }
 
             #[inline(always)]
-            fn map(self, f: impl Fn(f32) -> f32) -> Self {
+            fn map(self, f: impl Fn($f32) -> $f32) -> Self {
                 let arr = self.into_arr();
                 Self::from([f(arr[0]), $(f(arr[$ii])),+])
             }
 
             #[inline(always)]
-            fn zip_map(self, rhs: Self, f: impl Fn(f32, f32) -> f32) -> Self {
+            fn zip_map(self, rhs: Self, f: impl Fn($f32, $f32) -> $f32) -> Self {
                 let arr = self.into_arr();
                 let rhs = rhs.into_arr();
                 Self::from([
@@ -76,17 +91,17 @@ macro_rules! impl_wide_f32(
         }
 
         impl $WideBoolF32xX {
-            fn from_arr(arr: [f32; $lanes]) -> Self {
+            fn from_arr(arr: [$f32; $lanes]) -> Self {
                 Self(arr.into())
             }
 
-            fn into_arr(self) -> [f32; $lanes] {
+            fn into_arr(self) -> [$f32; $lanes] {
                 self.0.into()
             }
         }
 
         impl SimdValue for $WideF32xX {
-            type Element = f32;
+            type Element = $f32;
             type SimdBool = $WideBoolF32xX;
 
             #[inline(always)]
@@ -159,7 +174,7 @@ macro_rules! impl_wide_f32(
 
             #[inline(always)]
             fn replace(&mut self, i: usize, val: Self::Element) {
-                let vals = [0.0f32, f32::from_bits(std::u32::MAX)];
+                let vals = [0.0, <$f32>::from_bits(Bounded::max_value())];
                 let mut arr = self.into_arr();
                 arr[i] = vals[val as usize];
                 *self = Self::from_arr(arr);
@@ -167,7 +182,7 @@ macro_rules! impl_wide_f32(
 
             #[inline(always)]
             unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element) {
-                let vals = [0.0f32, f32::from_bits(std::u32::MAX)];
+                let vals = [0.0, <$f32>::from_bits(Bounded::max_value())];
                 let mut arr = self.into_arr();
                 *arr.get_unchecked_mut(i) = vals[val as usize];
                 *self = Self::from_arr(arr);
@@ -319,16 +334,16 @@ macro_rules! impl_wide_f32(
             }
         }
 
-        impl From<[f32; $lanes]> for $WideF32xX {
+        impl From<[$f32; $lanes]> for $WideF32xX {
             #[inline(always)]
-            fn from(vals: [f32; $lanes]) -> Self {
+            fn from(vals: [$f32; $lanes]) -> Self {
                 $WideF32xX(wide::$f32xX::from(vals))
             }
         }
 
-        impl From<$WideF32xX> for [f32; $lanes] {
+        impl From<$WideF32xX> for [$f32; $lanes] {
             #[inline(always)]
-            fn from(val: $WideF32xX) -> [f32; $lanes] {
+            fn from(val: $WideF32xX) -> [$f32; $lanes] {
                 val.0.into()
             }
         }
@@ -358,7 +373,7 @@ macro_rules! impl_wide_f32(
         impl From<[bool; $lanes]> for $WideBoolF32xX {
             #[inline(always)]
             fn from(vals: [bool; $lanes]) -> Self {
-                let bits = [0.0f32, f32::from_bits(std::u32::MAX)];
+                let bits = [0.0, <$f32>::from_bits(Bounded::max_value())];
                 $WideBoolF32xX(wide::$f32xX::from([
                     bits[vals[0] as usize],
                     $(bits[vals[$ii] as usize]),*
@@ -389,80 +404,80 @@ macro_rules! impl_wide_f32(
         }
 
         impl Num for $WideF32xX {
-            type FromStrRadixErr = <f32 as Num>::FromStrRadixErr;
+            type FromStrRadixErr = <$f32 as Num>::FromStrRadixErr;
 
             #[inline(always)]
             fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-                f32::from_str_radix(str, radix).map(Self::splat)
+                <$f32>::from_str_radix(str, radix).map(Self::splat)
             }
         }
 
         impl FromPrimitive for $WideF32xX {
             #[inline(always)]
             fn from_i64(n: i64) -> Option<Self> {
-                f32::from_i64(n).map(Self::splat)
+                <$f32>::from_i64(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_u64(n: u64) -> Option<Self> {
-                f32::from_u64(n).map(Self::splat)
+                <$f32>::from_u64(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_isize(n: isize) -> Option<Self> {
-                f32::from_isize(n).map(Self::splat)
+                <$f32>::from_isize(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_i8(n: i8) -> Option<Self> {
-                f32::from_i8(n).map(Self::splat)
+                <$f32>::from_i8(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_i16(n: i16) -> Option<Self> {
-                f32::from_i16(n).map(Self::splat)
+                <$f32>::from_i16(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_i32(n: i32) -> Option<Self> {
-                f32::from_i32(n).map(Self::splat)
+                <$f32>::from_i32(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_usize(n: usize) -> Option<Self> {
-                f32::from_usize(n).map(Self::splat)
+                <$f32>::from_usize(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_u8(n: u8) -> Option<Self> {
-                f32::from_u8(n).map(Self::splat)
+                <$f32>::from_u8(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_u16(n: u16) -> Option<Self> {
-                f32::from_u16(n).map(Self::splat)
+                <$f32>::from_u16(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_u32(n: u32) -> Option<Self> {
-                f32::from_u32(n).map(Self::splat)
+                <$f32>::from_u32(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_f32(n: f32) -> Option<Self> {
-                f32::from_f32(n).map(Self::splat)
+                <$f32>::from_f32(n).map(Self::splat)
             }
 
             #[inline(always)]
             fn from_f64(n: f64) -> Option<Self> {
-                f32::from_f64(n).map(Self::splat)
+                <$f32>::from_f64(n).map(Self::splat)
             }
         }
 
         impl Zero for $WideF32xX {
             #[inline(always)]
             fn zero() -> Self {
-                <$WideF32xX>::splat(f32::zero())
+                <$WideF32xX>::splat(<$f32>::zero())
             }
 
             #[inline(always)]
@@ -474,7 +489,7 @@ macro_rules! impl_wide_f32(
         impl One for $WideF32xX {
             #[inline(always)]
             fn one() -> Self {
-                <$WideF32xX>::splat(f32::one())
+                <$WideF32xX>::splat(<$f32>::one())
             }
         }
 
@@ -669,7 +684,7 @@ macro_rules! impl_wide_f32(
 
             #[inline(always)]
             fn simd_default_epsilon() -> Self {
-                Self::splat(f32::default_epsilon())
+                Self::splat(<$f32>::default_epsilon())
             }
 
             #[inline(always)]
@@ -1448,11 +1463,11 @@ macro_rules! impl_wide_f32(
 );
 
 macro_rules! impl_scalar_subset_of_simd(
-    ($WideF32xX: ty, $lanes: expr; $($t: ty),*) => {$(
+    ($WideF32xX: ty, $f32: ty, $lanes: expr; $($t: ty),*) => {$(
         impl SubsetOf<$WideF32xX> for $t {
             #[inline(always)]
             fn to_superset(&self) -> $WideF32xX {
-                <$WideF32xX>::splat(f32::from_subset(self))
+                <$WideF32xX>::splat(<$f32>::from_subset(self))
             }
 
             #[inline(always)]
@@ -1463,24 +1478,26 @@ macro_rules! impl_scalar_subset_of_simd(
             #[inline(always)]
             fn is_in_subset(c: &$WideF32xX) -> bool {
                 let elt0 = c.extract(0);
-                <$t as SubsetOf<f32>>::is_in_subset(&elt0) &&
+                <$t as SubsetOf<$f32>>::is_in_subset(&elt0) &&
                 (1..$lanes).all(|i| c.extract(i) == elt0)
             }
         }
     )*}
 );
 
-impl_scalar_subset_of_simd!(WideF32x4, 4; u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, f32, f64);
+impl_scalar_subset_of_simd!(WideF32x4, f32, 4; u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, f32, f64);
+impl_scalar_subset_of_simd!(WideF64x4, f64, 4; u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, f32, f64);
 //#[cfg(feature = "decimal")]
 //impl_scalar_subset_of_simd!(WideF32x4, 4; d128);
-impl_scalar_subset_of_simd!(WideF32x8, 8; u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, f32, f64);
+impl_scalar_subset_of_simd!(WideF32x8, f32, 8; u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, f32, f64);
 //#[cfg(feature = "decimal")]
 //impl_scalar_subset_of_simd!(WideF32x8, 8; d128);
 
-// NOTE: don’t include the 0 for the indices because they are taken care
+// NOTE: don’t include the 0 for the indices because they are taken care
 // for explicitly in the macro (it’s simpler that way).
-impl_wide_f32!(f32x4, WideF32x4, WideBoolF32x4, 4; 1, 2, 3);
-impl_wide_f32!(f32x8, WideF32x8, WideBoolF32x8, 8; 1, 2, 3, 4, 5, 6, 7);
+impl_wide_f32!(f32, f32x4, WideF32x4, WideBoolF32x4, 4; 1, 2, 3);
+impl_wide_f32!(f64, f64x4, WideF64x4, WideBoolF64x4, 4; 1, 2, 3);
+impl_wide_f32!(f32, f32x8, WideF32x8, WideBoolF32x8, 8; 1, 2, 3, 4, 5, 6, 7);
 
 #[inline]
 fn simd_complex_from_polar<N: SimdRealField>(r: N, theta: N) -> num_complex::Complex<N> {
