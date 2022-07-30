@@ -11,7 +11,9 @@ pub use self::simd_real::SimdRealField;
 pub use self::simd_signed::SimdSigned;
 pub use self::simd_value::{PrimitiveSimdValue, SimdValue};
 #[cfg(feature = "wide")]
-pub use self::wide_simd_impl::{WideBoolF32x4, WideBoolF32x8, WideF32x4, WideF32x8};
+pub use self::wide_simd_impl::{
+    WideBoolF32x4, WideBoolF32x8, WideBoolF64x4, WideF32x4, WideF32x8, WideF64x4,
+};
 
 mod auto_simd_impl;
 #[cfg(feature = "packed_simd")]
