@@ -19,6 +19,7 @@ default = [ "std" ]
 std = ["wide/std"]
 partial_fixed_point_support = [ "fixed", "cordic" ]
 serde_serialize = [ "serde", "fixed/serde" ]
+rkyv-serialize = [ "rkyv" ]
 libm = [ "num-traits/libm" ]
 cuda = [ "cuda_std" ]
 
@@ -34,6 +35,7 @@ cordic      = { version = "0.1", optional = true }
 paste       = "1.0"
 rand        = { version = "0.8", optional = true }
 serde       = { version = "1", default-features = false, optional = true }
+rkyv        = { version = "0.7", optional = true }
 libm_force  = { package = "libm", version = "0.2", optional = true }
 cuda_std    = { version = "0.2", optional = true }
 

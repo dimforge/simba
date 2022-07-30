@@ -36,17 +36,26 @@ macro_rules! ident_to_value(
     }
 );
 
-/// An Simd structure that implements all the relevant traits from `num` an `simba`.
+/// A SIMD structure that implements all the relevant traits from `num` an `simba`.
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(align(16))]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
+)]
 pub struct AutoSimd<N>(pub N);
-/// An Simd boolean structure that implements all the relevant traits from `num` an `simba`.
+
+/// A SIMD boolean structure that implements all the relevant traits from `num` an `simba`.
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(align(16))]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[cfg_attr(
+    feature = "rkyv",
+    derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
+)]
 pub struct AutoBoolSimd<N>(pub N);
 
 macro_rules! impl_bool_simd(
