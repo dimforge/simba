@@ -1,3 +1,9 @@
+## Release v0.7.2 (30 July 2022)
+- Add the optional types `WideF64x4` and `WideBoolF64x4` for 4-lanes SIMD 64-bits float operations based on
+  the `wide` crate.
+- Add the `rkyv-serialize` feature to enable `rkyv` serialization/deserialization of the `AutoSimd` types.
+- Fix build with only the `libm` feature enabled.
+
 ## Release v0.7.1 (27 Jan. 2022)
 - Add the optional types `WideF32x8` and `WideBoolF32x8` for 8-lanes SIMD float operations.
 
