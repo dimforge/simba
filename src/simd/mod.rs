@@ -27,3 +27,5 @@ mod simd_signed;
 mod simd_value;
 #[cfg(feature = "wide")]
 mod wide_simd_impl;
+#[cfg(feature = "rand")]
+mod rand_impl;
