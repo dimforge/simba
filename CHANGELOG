@@ -1,3 +1,7 @@
+## Release v0.7.3 (30 Oct. 2022)
+- Cuda: implement DeviceCopy for AutoSimd
+- Implement `Distribution` (for random number generation) for SIMD types.
+
 ## Release v0.7.2 (30 July 2022)
 - Add the optional types `WideF64x4` and `WideBoolF64x4` for 4-lanes SIMD 64-bits float operations based on
   the `wide` crate.
