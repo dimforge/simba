@@ -17,7 +17,7 @@ Two cargo features can be optionally enabled:
  `f64x4`, `i32i8`, `u16i16`, etc. There types are wrappers around the SIMD types from the [__packed_simd__
  crate](https://docs.rs/packed_simd). This requires a nightly compiler.
 - With the __`wide`__ feature enabled, the `simba::simd` module will export the `WideF32x4` and `WideBoolF32x4`
-  types. They types ure wrapper around the `wide::f32x4` type from the [__wide__ crate](https://docs.rs/wide).
+  types. The types are wrappers around the `wide::f32x4` type from the [__wide__ crate](https://docs.rs/wide).
   This will work with both a stable or nightly compiler.
 
 If none of those features are enabled, __simba__ will still define all the scalar and SIMD traits.
