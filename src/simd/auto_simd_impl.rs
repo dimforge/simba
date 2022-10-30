@@ -45,6 +45,7 @@ macro_rules! ident_to_value(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
 )]
+#[cfg_attr(feature = "cuda", derive(cust_core::DeviceCopy))]
 pub struct AutoSimd<N>(pub N);
 
 /// A SIMD boolean structure that implements all the relevant traits from `num` an `simba`.
