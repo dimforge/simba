@@ -18,6 +18,8 @@ pub use self::wide_simd_impl::{
 mod auto_simd_impl;
 #[cfg(feature = "packed_simd")]
 mod packed_simd_impl;
+#[cfg(feature = "rand")]
+mod rand_impl;
 mod simd_bool;
 mod simd_complex;
 mod simd_option;
@@ -27,5 +29,3 @@ mod simd_signed;
 mod simd_value;
 #[cfg(feature = "wide")]
 mod wide_simd_impl;
-#[cfg(feature = "rand")]
-mod rand_impl;
