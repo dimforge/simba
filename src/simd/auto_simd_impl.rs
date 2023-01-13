@@ -43,7 +43,8 @@ macro_rules! ident_to_value(
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[cfg_attr(
     feature = "rkyv",
-    derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
+    derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize),
+    archive(as = "Self", bound(archive = "N: rkyv::Archive<Archived = N>"))
 )]
 #[cfg_attr(feature = "cuda", derive(cust_core::DeviceCopy))]
 pub struct AutoSimd<N>(pub N);
@@ -55,7 +56,8 @@ pub struct AutoSimd<N>(pub N);
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 #[cfg_attr(
     feature = "rkyv",
-    derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)
+    derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize),
+    archive(as = "Self", bound(archive = "N: rkyv::Archive<Archived = N>"))
 )]
 pub struct AutoBoolSimd<N>(pub N);
 
