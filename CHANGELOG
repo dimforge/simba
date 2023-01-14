@@ -1,3 +1,7 @@
+## Release v0.8.0 (14 Jan. 2023)
+- When `rkyv` support is enabled, the archived version of `AutoSimd` and `AutoBoolSimd` are themselves. The
+ `ArchivedAutoSimd` and `ArchivedAutoBoolSimd` types are no longer generated.
+
 ## Release v0.7.3 (30 Oct. 2022)
 - Cuda: implement DeviceCopy for AutoSimd
 - Implement `Distribution` (for random number generation) for SIMD types.
