@@ -19,7 +19,7 @@ default = [ "std" ]
 std = ["wide/std"]
 partial_fixed_point_support = [ "fixed", "cordic" ]
 serde_serialize = [ "serde", "fixed/serde" ]
-rkyv-serialize = [ "rkyv", "wide/rkyv-serialize" ]
+rkyv-serialize = [ "rkyv" ]
 libm = [ "num-traits/libm" ]
 cuda = [ "cuda_std", "cust_core" ]
 
