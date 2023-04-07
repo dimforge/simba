@@ -20,12 +20,44 @@ use std::{
 };
 use wide::{CmpEq, CmpGe, CmpGt, CmpLe, CmpLt, CmpNe};
 
+#[cfg(feature = "rkyv")]
+macro_rules! impl_rkyv {
+    ($type:ty, $array:ty) => {
+        impl rkyv::Archive for $type {
+            type Archived = $array;
+            type Resolver = ();
+
+            #[inline]
+            unsafe fn resolve(&self, _: usize, _: Self::Resolver, out: *mut Self::Archived) {
+                out.write((*self).into_arr());
+            }
+        }
+
+        impl<S: rkyv::Fallible + ?Sized> rkyv::Serialize<S> for $type {
+            #[inline]
+            fn serialize(&self, _: &mut S) -> Result<Self::Resolver, S::Error> {
+                Ok(())
+            }
+        }
+
+        impl<D: rkyv::Fallible + ?Sized> rkyv::Deserialize<$type, D> for rkyv::Archived<$type> {
+            #[inline]
+            fn deserialize(&self, _: &mut D) -> Result<$type, D::Error> {
+                Ok(<$type>::from_arr(*self))
+            }
+        }
+    };
+}
+
 /// A wrapper type of `wide::f32x4` that implements all the relevant traits from `num` and `simba`.
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
 #[derive(Copy, Clone, Debug)]
 pub struct WideF32x4(pub wide::f32x4);
+
+#[cfg(feature = "rkyv")]
+impl_rkyv!(WideF32x4, [f32; 4]);
 
 /// An SIMD boolean structure associated to `wide::f32x4` that implements all the relevant traits from `simba`.
 ///
@@ -34,12 +66,18 @@ pub struct WideF32x4(pub wide::f32x4);
 #[derive(Copy, Clone, Debug)]
 pub struct WideBoolF32x4(pub wide::f32x4);
 
+#[cfg(feature = "rkyv")]
+impl_rkyv!(WideBoolF32x4, [f32; 4]);
+
 /// A wrapper type of `wide::f32x8` that implements all the relevant traits from `num` and `simba`.
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
 #[derive(Copy, Clone, Debug)]
 pub struct WideF32x8(pub wide::f32x8);
+
+#[cfg(feature = "rkyv")]
+impl_rkyv!(WideF32x8, [f32; 8]);
 
 /// An SIMD boolean structure associated to `wide::f32x8` that implements all the relevant traits from `simba`.
 ///
@@ -48,6 +86,9 @@ pub struct WideF32x8(pub wide::f32x8);
 #[derive(Copy, Clone, Debug)]
 pub struct WideBoolF32x8(pub wide::f32x8);
 
+#[cfg(feature = "rkyv")]
+impl_rkyv!(WideBoolF32x8, [f32; 8]);
+
 /// A wrapper type of `wide::f64x4` that implements all the relevant traits from `num` and `simba`.
 ///
 /// This is needed to overcome the orphan rules.
@@ -55,12 +96,18 @@ pub struct WideBoolF32x8(pub wide::f32x8);
 #[derive(Copy, Clone, Debug)]
 pub struct WideF64x4(pub wide::f64x4);
 
+#[cfg(feature = "rkyv")]
+impl_rkyv!(WideF64x4, [f64; 4]);
+
 /// An SIMD boolean structure associated to `wide::f64x4` that implements all the relevant traits from `simba`.
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
 #[derive(Copy, Clone, Debug)]
 pub struct WideBoolF64x4(pub wide::f64x4);
+
+#[cfg(feature = "rkyv")]
+impl_rkyv!(WideBoolF64x4, [f64; 4]);
 
 macro_rules! impl_wide_f32(
     ($f32: ident, $f32xX: ident, $WideF32xX: ident, $WideBoolF32xX: ident, $lanes: expr; $($ii: expr),+) => {
@@ -71,6 +118,11 @@ macro_rules! impl_wide_f32(
             #[inline(always)]
             fn into_arr(self) -> [$f32; $lanes] {
                 self.0.into()
+            }
+
+            #[inline(always)]
+            fn from_arr(arr: [$f32; $lanes]) -> Self {
+                Self(arr.into())
             }
 
             #[inline(always)]
