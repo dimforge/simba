@@ -26,10 +26,8 @@ jobs:
       run: cargo build --no-default-features --features libm;
     - name: Build (default features)
       run: cargo build;
-    - name: Build --features wide
-      run: cargo build --features wide;
-    - name: Build --features partial_fixed_point_support
-      run: cargo build --features partial_fixed_point_support;
+    - name: Build all features except cuda,libm
+      run: cargo build --features wide,rkyv-serialize,serde_serialize,partial_fixed_point_support;
   build-wasm:
     runs-on: ubuntu-latest
     steps:
