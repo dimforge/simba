@@ -1,3 +1,6 @@
+## Release v0.8.1 (04 Apr. 2023)
+- Add implementation of `rkyv` serialization/deserialization to the `Wide*` wrapper types.
+
 ## Release v0.8.0 (14 Jan. 2023)
 - When `rkyv` support is enabled, the archived version of `AutoSimd` and `AutoBoolSimd` are themselves. The
  `ArchivedAutoSimd` and `ArchivedAutoBoolSimd` types are no longer generated.
