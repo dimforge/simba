@@ -204,12 +204,12 @@ impl_rand_packed_simd!(
 #[cfg(feature = "portable_simd")]
 macro_rules! impl_rand_portable_simd(
     ($($wrapped: ty, $($i: ident),*;)*) => ($(
-        impl rand::distributions::Distribution<Simd<$wrapped>> for rand::distributions::Standard {
+        impl rand::distributions::Distribution<$wrapped> for rand::distributions::Standard {
             #[inline(always)]
-            fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Simd<$wrapped> {
-                Simd(<$wrapped>::new($(
+            fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $wrapped {
+                <$wrapped>::new($(
                     ignore_snd!([self.sample(rng)], [$i])
-                ),*))
+                ),*)
             }
         }
     )*)
