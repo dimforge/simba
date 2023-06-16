@@ -32,6 +32,7 @@ However, the SIMD traits won't be implemented for any SIMD types. Therefore it i
 #![deny(unused_results)]
 #![deny(missing_docs)] // FIXME: should be denied
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "portable_simd", feature(portable_simd))]
 
 #[cfg(not(feature = "std"))]
 extern crate core as std;

@@ -17,6 +17,7 @@ maintenance = { status = "actively-developed" }
 [features]
 default = [ "std" ]
 std = ["wide/std"]
+portable_simd = []
 partial_fixed_point_support = [ "fixed", "cordic" ]
 serde_serialize = [ "serde", "fixed/serde" ]
 rkyv-serialize = [ "rkyv" ]
