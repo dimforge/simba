@@ -126,7 +126,7 @@ macro_rules! impl_bool_simd(
         impl Not for Simd<$t> {
             type Output = Self;
 
-            #[inline]
+            #[inline(always)]
             fn not(self) -> Self {
                 Self(!self.0)
             }
@@ -134,6 +134,7 @@ macro_rules! impl_bool_simd(
 
         impl BitAnd<Simd<$t>> for Simd<$t> {
             type Output = Self;
+            #[inline(always)]
             fn bitand(self, rhs: Self) -> Self {
                 Simd(self.0.bitand(rhs.0))
             }
@@ -141,6 +142,7 @@ macro_rules! impl_bool_simd(
 
         impl BitOr<Simd<$t>> for Simd<$t> {
             type Output = Self;
+            #[inline(always)]
             fn bitor(self, rhs: Self) -> Self {
                 Simd(self.0.bitor(rhs.0))
             }
@@ -148,6 +150,7 @@ macro_rules! impl_bool_simd(
 
         impl BitXor<Simd<$t>> for Simd<$t> {
             type Output = Self;
+            #[inline(always)]
             fn bitxor(self, rhs: Self) -> Self {
                 Simd(self.0.bitxor(rhs.0))
             }
