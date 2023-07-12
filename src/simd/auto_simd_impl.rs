@@ -985,12 +985,12 @@ macro_rules! impl_float_simd(
                 (self.simd_sin(), self.simd_cos())
             }
 
-//            #[inline(always]
+//            #[inline(always)]
 //            fn simd_exp_m1(self) -> Self {
 //                $libm::exp_m1(self)
 //            }
 //
-//            #[inline(always]
+//            #[inline(always)]
 //            fn simd_ln_1p(self) -> Self {
 //                $libm::ln_1p(self)
 //            }
