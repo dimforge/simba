@@ -20,6 +20,9 @@ use std::{
     },
 };
 
+#[cfg(feature = "partial_fixed_point_support")]
+use crate::scalar::FixedI32F32;
+
 // This is a hack to allow use to reuse `_0` as integers or as identifier,
 // depending on whether or not `ident_to_value` has been called in scope.
 // This helps writing macros that define both `::new` and `From([T; lanes()])`.
@@ -229,6 +232,9 @@ macro_rules! impl_scalar_subset_of_simd(
 impl_scalar_subset_of_simd!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, f32, f64);
 #[cfg(feature = "decimal")]
 impl_scalar_subset_of_simd!(d128);
+
+#[cfg(feature = "partial_fixed_point_support")]
+impl_scalar_subset_of_simd!(FixedI32F32);
 
 macro_rules! impl_simd_value(
     ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $($i: ident),*;)*) => ($(
@@ -1478,6 +1484,13 @@ impl_float_simd!(
     [f64; 8], f64, 8, [i64; 8], AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
 );
 
+#[cfg(feature = "partial_fixed_point_support")]
+impl_float_simd!(
+    [FixedI32F32; 2], FixedI32F32, 2, [i64; 2], AutoBoolx2, _0, _1;
+    [FixedI32F32; 4], FixedI32F32, 4, [i64; 4], AutoBoolx4, _0, _1, _2, _3;
+    [FixedI32F32; 8], FixedI32F32, 8, [i64; 8], AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
+);
+
 impl_int_simd!(
     [i128; 1], i128, 1, AutoBoolx1, _0;
     [i128; 2], i128, 2, AutoBoolx2, _0, _1;
@@ -1633,6 +1646,15 @@ pub type AutoBoolx32 = AutoSimd<[bool; 32]>;
 pub type AutoBoolx4 = AutoSimd<[bool; 4]>;
 // pub type AutoBoolx64 = AutoSimd<[bool; 64]>;
 pub type AutoBoolx8 = AutoSimd<[bool; 8]>;
+
+#[cfg(feature = "partial_fixed_point_support")]
+pub type AutoFixedI32F32x2 = AutoSimd<[FixedI32F32; 2]>;
+
+#[cfg(feature = "partial_fixed_point_support")]
+pub type AutoFixedI32F32x4 = AutoSimd<[FixedI32F32; 4]>;
+
+#[cfg(feature = "partial_fixed_point_support")]
+pub type AutoFixedI32F32x8 = AutoSimd<[FixedI32F32; 8]>;
 
 /*
  * Helper trait to transform an array.
