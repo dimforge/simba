@@ -16,6 +16,7 @@ use std::hash::{Hash, Hasher};
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
+use std::iter::{Sum, Product};
 
 macro_rules! impl_fixed_type(
     ($($FixedI: ident, $Int: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident, $LeEqDim4: ident;)*) => {$(
@@ -135,6 +136,42 @@ macro_rules! impl_fixed_type(
                 } else {
                     other
                 }
+            }
+        }
+
+        impl<Fract: $LeEqDim> Sum for $FixedI<Fract> {
+            fn sum<I: Iterator<Item=Self>>(iter: I) -> Self {
+                iter.fold(
+                    Self::zero(),
+                    |a, b| a + b,
+                )
+            }
+        }
+
+        impl<'a, Fract: $LeEqDim> Sum<&'a $FixedI<Fract>> for $FixedI<Fract> {
+            fn sum<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
+                iter.fold(
+                    Self::zero(),
+                    |a, b| a + *b,
+                )
+            }
+        }
+
+        impl<Fract: $LeEqDim> Product for $FixedI<Fract> {
+            fn product<I: Iterator<Item=Self>>(iter: I) -> Self {
+                iter.fold(
+                    Self::one(),
+                    |a, b| a * b,
+                )
+            }
+        }
+
+        impl<'a, Fract: $LeEqDim> Product<&'a $FixedI<Fract> > for $FixedI<Fract>  {
+            fn product<I: Iterator<Item=&'a Self>>(iter: I) -> Self {
+                iter.fold(
+                    Self::one(),
+                    |a, b| a * *b,
+                )
             }
         }
 
