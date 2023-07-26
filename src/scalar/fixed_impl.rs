@@ -3,12 +3,12 @@
 //! Implementation of traits form fixed-point numbers.
 use crate::scalar::{ComplexField, Field, RealField, SubsetOf};
 use crate::simd::{PrimitiveSimdValue, SimdValue};
-use fixed::traits::ToFixed;
+use fixed::traits::{ToFixed, FromFixed};
 use fixed::types::extra::{
     IsLessOrEqual, LeEqU16, LeEqU32, LeEqU64, LeEqU8, True, Unsigned, U12, U13, U14, U15, U28, U29,
     U30, U31, U4, U5, U6, U60, U61, U62, U63, U7,
 };
-use num::{Bounded, FromPrimitive, Num, One, Signed, Zero};
+use num::{Bounded, ToPrimitive, FromPrimitive, Num, One, Signed, Zero};
 #[cfg(feature = "serde_serialize")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::cmp::Ordering;
@@ -28,12 +28,28 @@ macro_rules! impl_fixed_type(
         impl<Fract: $LeEqDim> $FixedI<Fract> {
             /// Creates a fixed-point number from another number.
             #[inline(always)]
-            pub fn from_num<N: fixed::traits::ToFixed>(val: N) -> Self {
+            pub fn from_num<N: ToFixed>(val: N) -> Self {
                 $FixedI(fixed::$FixedI::from_num(val))
+            }
+
+            /// Creates a fixed-point number from another number.
+            #[inline(always)]
+            pub fn to_num<N: FromFixed>(self) -> N {
+                self.0.to_num()
+            }
+
+            /// Creates a fixed-point number from string literal.
+            #[inline(always)]
+            pub const fn lit(src: &str) -> Self {
+                $FixedI(fixed::$FixedI::lit(src))
             }
         }
 
         impl<Fract> $FixedI<Fract> {
+            pub const EPSILON: $FixedI<Fract> = Self::from_bits(0b01);
+            pub const MAX: $FixedI<Fract> = $FixedI(fixed::$FixedI::MAX);
+            pub const MIN: $FixedI<Fract> = $FixedI(fixed::$FixedI::MIN);
+
             /// Creates a fixed-point number that has a bitwise representation identical to the given integer.
             #[inline(always)]
             pub const fn from_bits(bits: $Int) -> Self {
@@ -44,6 +60,12 @@ macro_rules! impl_fixed_type(
             #[inline(always)]
             pub const fn to_bits(self) -> $Int {
                 self.0.to_bits()
+            }
+        }
+
+        impl<Fract: $LeEqDim> Default for $FixedI<Fract> {
+            fn default() -> Self {
+                $FixedI(fixed::$FixedI::default())
             }
         }
 
@@ -375,6 +397,28 @@ macro_rules! impl_fixed_type(
             }
         }
 
+        impl<Fract: $LeEqDim> SubsetOf<$FixedI<Fract>> for u32 {
+            #[inline]
+            fn to_superset(&self) -> $FixedI<Fract> {
+                $FixedI(fixed::$FixedI::from_num(*self))
+            }
+
+            #[inline]
+            fn from_superset(element: &$FixedI<Fract>) -> Option<Self> {
+                Some(Self::from_superset_unchecked(element))
+            }
+
+            #[inline]
+            fn from_superset_unchecked(element: &$FixedI<Fract>) -> Self {
+                element.0.to_num::<u32>()
+            }
+
+            #[inline]
+            fn is_in_subset(_: &$FixedI<Fract>) -> bool {
+                true
+            }
+        }
+
         impl<Fract: $LeEqDim> approx::AbsDiffEq for $FixedI<Fract> {
             type Epsilon = Self;
             fn default_epsilon() -> Self::Epsilon {
@@ -511,6 +555,45 @@ macro_rules! impl_fixed_type(
             }
             fn from_f64(n: f64) -> Option<Self> {
                 n.checked_to_fixed().map(Self)
+            }
+        }
+
+        impl<Fract: $LeEqDim> ToPrimitive for $FixedI<Fract> {
+            fn to_i64(&self) -> Option<i64> {
+                self.0.checked_to_num()
+            }
+            fn to_u64(&self) -> Option<u64> {
+                self.0.checked_to_num()
+            }
+            fn to_isize(&self) -> Option<isize> {
+                self.0.checked_to_num()
+            }
+            fn to_i8(&self) -> Option<i8> {
+                self.0.checked_to_num()
+            }
+            fn to_i16(&self) -> Option<i16> {
+                self.0.checked_to_num()
+            }
+            fn to_i32(&self) -> Option<i32> {
+                self.0.checked_to_num()
+            }
+            fn to_usize(&self) -> Option<usize> {
+                self.0.checked_to_num()
+            }
+            fn to_u8(&self) -> Option<u8> {
+                self.0.checked_to_num()
+            }
+            fn to_u16(&self) -> Option<u16> {
+                self.0.checked_to_num()
+            }
+            fn to_u32(&self) -> Option<u32> {
+                self.0.checked_to_num()
+            }
+            fn to_f32(&self) -> Option<f32> {
+                self.0.checked_to_num()
+            }
+            fn to_f64(&self) -> Option<f64> {
+                self.0.checked_to_num()
             }
         }
 
@@ -829,6 +912,11 @@ macro_rules! impl_fixed_type(
             }
 
             #[inline]
+            fn is_nan(&self) -> bool {
+                false
+            }
+
+            #[inline]
             fn copysign(self, sign: Self) -> Self {
                 if sign >= Self::zero() {
                     self.abs()
@@ -1109,3 +1197,52 @@ pub type FixedI7F57 = FixedI64<fixed::types::extra::U57>;
 pub type FixedI6F58 = FixedI64<fixed::types::extra::U58>;
 pub type FixedI5F59 = FixedI64<fixed::types::extra::U59>;
 pub type FixedI4F60 = FixedI64<fixed::types::extra::U60>;
+
+impl From<f32> for FixedI32F32 {
+    #[inline]
+    fn from(val: f32) -> Self {
+        Self::from_num(val)
+    }
+}
+
+impl From<f64> for FixedI32F32 {
+    #[inline]
+    fn from(val: f64) -> Self {
+        Self::from_num(val)
+    }
+}
+
+impl From<u32> for FixedI32F32 {
+    #[inline]
+    fn from(val: u32) -> Self {
+        Self::from_num(val)
+    }
+}
+
+impl From<i32> for FixedI32F32 {
+    #[inline]
+    fn from(val: i32) -> Self {
+        Self::from_num(val)
+    }
+}
+
+impl From<i16> for FixedI32F32 {
+    #[inline]
+    fn from(val: i16) -> Self {
+        Self::from_num(val)
+    }
+}
+
+impl From<FixedI32F32> for f64 {
+    #[inline]
+    fn from(val: FixedI32F32) -> Self {
+        val.to_num()
+    }
+}
+
+impl From<FixedI32F32> for isize {
+    #[inline]
+    fn from(val: FixedI32F32) -> Self {
+        val.to_num()
+    }
+}

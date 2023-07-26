@@ -30,6 +30,10 @@ pub trait RealField:
     fn is_sign_positive(&self) -> bool;
     /// Is the sign of this real number negative?
     fn is_sign_negative(&self) -> bool;
+
+    // Returns true if the number is NaN.
+    fn is_nan(&self) -> bool;
+
     /// Copies the sign of `sign` to `self`.
     ///
     /// - Returns `self.simd_abs()` if `sign` is positive or positive-zero.
@@ -75,6 +79,11 @@ macro_rules! impl_real(
             #[inline]
             fn is_sign_negative(&self) -> bool {
                 $M::is_sign_negative(*self)
+            }
+
+            #[inline]
+            fn is_nan(&self) -> bool {
+                $M::is_nan(*self)
             }
 
             #[inline(always)]
