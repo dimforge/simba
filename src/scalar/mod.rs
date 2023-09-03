@@ -1,7 +1,10 @@
 //! Traits implemented by scalar, non-SIMD, types.
 
 pub use self::complex::ComplexField;
-pub use self::field::{ClosedAdd, ClosedDiv, ClosedMul, ClosedNeg, ClosedSub, Field};
+pub use self::field::{
+    ClosedAdd, ClosedAddAssign, ClosedDiv, ClosedDivAssign, ClosedMul, ClosedMulAssign, ClosedNeg,
+    ClosedSub, ClosedSubAssign, Field,
+};
 #[cfg(feature = "partial_fixed_point_support")]
 pub use self::fixed_impl::*;
 pub use self::real::RealField;
