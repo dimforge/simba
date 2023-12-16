@@ -46,7 +46,6 @@ macro_rules! ident_to_value(
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize),
     archive(as = "Self", bound(archive = "N: rkyv::Archive<Archived = N>"))
 )]
-#[cfg_attr(feature = "cuda", derive(cust_core::DeviceCopy))]
 pub struct AutoSimd<N>(pub N);
 
 /// A SIMD boolean structure that implements all the relevant traits from `num` an `simba`.
@@ -669,7 +668,7 @@ macro_rules! impl_float_simd(
 
         impl Field for AutoSimd<$t> {}
 
-        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force", all(any(target_arch = "nvptx", target_arch = "nvptx64"), feature = "cuda")))]
+        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force"))]
         impl SimdRealField for AutoSimd<$t> {
             #[inline(always)]
             fn simd_atan2(self, other: Self) -> Self {
@@ -763,7 +762,7 @@ macro_rules! impl_float_simd(
             }
         }
 
-        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force", all(any(target_arch = "nvptx", target_arch = "nvptx64"), feature = "cuda")))]
+        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force"))]
         impl SimdComplexField for AutoSimd<$t> {
             type SimdRealField = Self;
 
@@ -1029,7 +1028,7 @@ macro_rules! impl_float_simd(
         // NOTE: most of the impls in there are copy-paste from the implementation of
         // ComplexField for num_complex::Complex. Unfortunately, we can't reuse the implementations
         // so easily.
-        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force", all(any(target_arch = "nvptx", target_arch = "nvptx64"), feature = "cuda")))]
+        #[cfg(any(feature = "std", feature = "libm", feature = "libm_force"))]
         impl SimdComplexField for num_complex::Complex<AutoSimd<$t>> {
             type SimdRealField = AutoSimd<$t>;
 

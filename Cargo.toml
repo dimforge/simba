@@ -21,7 +21,6 @@ partial_fixed_point_support = [ "fixed", "cordic" ]
 serde_serialize = [ "serde", "fixed/serde" ]
 rkyv-serialize = [ "rkyv" ]
 libm = [ "num-traits/libm" ]
-cuda = [ "cuda_std", "cust_core" ]
 
 [dependencies]
 num-traits  = { version = "0.2.11", default-features = false }
@@ -37,8 +36,6 @@ rand        = { version = "0.8", optional = true }
 serde       = { version = "1", default-features = false, optional = true }
 rkyv        = { version = "0.7", optional = true }
 libm_force  = { package = "libm", version = "0.2", optional = true }
-cuda_std    = { version = "0.2", optional = true }
-cust_core   = { version = "0.1", optional = true }
 
 [package.metadata.docs.rs]
 all-features = true

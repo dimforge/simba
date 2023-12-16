@@ -1,3 +1,6 @@
+## Unreleased
+- The `cuda` feature has been removed, as the toolchain it depends on is long abandoned.
+
 ## Release v0.8.1 (04 Apr. 2023)
 - Add implementation of `rkyv` serialization/deserialization to the `Wide*` wrapper types.
 
