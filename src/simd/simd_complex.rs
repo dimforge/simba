@@ -1,8 +1,8 @@
 use num::{NumAssignOps, NumOps, Zero};
 use std::any::Any;
-use std::f64;
 use std::fmt::Debug;
 use std::ops::Neg;
+use std::{f32, f64};
 
 use crate::scalar::{ComplexField, Field, SubsetOf, SupersetOf};
 use crate::simd::{SimdRealField, SimdValue};
@@ -13,6 +13,7 @@ use crate::simd::{SimdRealField, SimdValue};
 #[allow(missing_docs)]
 pub trait SimdComplexField:
     SubsetOf<Self>
+    + SupersetOf<f32>
     + SupersetOf<f64>
     + Field
     + Clone

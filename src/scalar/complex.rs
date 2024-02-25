@@ -168,6 +168,7 @@ macro_rules! complex_trait_methods(
 #[allow(missing_docs)]
 pub trait ComplexField:
     SubsetOf<Self>
+    + SupersetOf<f32>
     + SupersetOf<f64>
     + FromPrimitive
     + Field<Element = Self, SimdBool = bool>
