@@ -23,7 +23,7 @@ use std::{
 // This is a hack to allow use to reuse `_0` as integers or as identifier,
 // depending on whether or not `ident_to_value` has been called in scope.
 // This helps writing macros that define both `::new` and `From([T; lanes()])`.
-macro_rules! ident_to_value(
+macro_rules! ident_to_value (
     () => {
         const _0: usize = 0; const _1: usize = 1; const _2: usize = 2; const _3: usize = 3; const _4: usize = 4; const _5: usize = 5; const _6: usize = 6; const _7: usize = 7;
         const _8: usize = 8; const _9: usize = 9; const _10: usize = 10; const _11: usize = 11; const _12: usize = 12; const _13: usize = 13; const _14: usize = 14; const _15: usize = 15;
@@ -43,7 +43,7 @@ macro_rules! ident_to_value(
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Simd<N>(pub N);
 
-macro_rules! impl_bool_simd(
+macro_rules! impl_bool_simd (
     ($($t: ty, $($i: ident),*;)*) => {$(
         impl_simd_value!($t, bool, Simd<$t> $(, $i)*;);
 
@@ -172,7 +172,7 @@ macro_rules! impl_bool_simd(
     )*}
 );
 
-macro_rules! impl_scalar_subset_of_simd(
+macro_rules! impl_scalar_subset_of_simd (
     ($($t: ty),*) => {$(
         impl<N2> SubsetOf<Simd<N2>> for $t
             where Simd<N2>: SimdValue + Copy,
@@ -201,7 +201,7 @@ impl_scalar_subset_of_simd!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, 
 #[cfg(feature = "decimal")]
 impl_scalar_subset_of_simd!(d128);
 
-macro_rules! impl_simd_value(
+macro_rules! impl_simd_value (
     ($($t: ty, $elt: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl fmt::Display for Simd<$t> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -220,6 +220,9 @@ macro_rules! impl_simd_value(
         }
 
         impl Simd<$t> {
+            pub const ZERO: Self = Simd(<$t>::ZERO);
+            pub const ONE: Self = Simd(<$t>::ONE);
+
             #[inline]
             pub fn new($($i: $elt),*) -> Self {
                 Simd(<$t>::new($($i),*))
@@ -270,7 +273,7 @@ macro_rules! impl_simd_value(
     )*)
 );
 
-macro_rules! impl_uint_simd(
+macro_rules! impl_uint_simd (
     ($($t: ty, $elt: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_simd_value!($t, $elt, $bool $(, $i)*;);
 
@@ -567,7 +570,7 @@ macro_rules! impl_uint_simd(
     )*)
 );
 
-macro_rules! impl_int_simd(
+macro_rules! impl_int_simd (
     ($($t: ty, $elt: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_uint_simd!($t, $elt, $bool $(, $i)*;);
 
@@ -582,7 +585,7 @@ macro_rules! impl_int_simd(
     )*)
 );
 
-macro_rules! impl_float_simd(
+macro_rules! impl_float_simd (
     ($($t: ty, $elt: ty, $int: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_int_simd!($t, $elt, $bool $(, $i)*;);
 

@@ -23,7 +23,7 @@ use std::{
 // This is a hack to allow use to reuse `_0` as integers or as identifier,
 // depending on whether or not `ident_to_value` has been called in scope.
 // This helps writing macros that define both `::new` and `From([T; lanes()])`.
-macro_rules! ident_to_value(
+macro_rules! ident_to_value (
     () => {
         const _0: usize = 0; const _1: usize = 1; const _2: usize = 2; const _3: usize = 3; const _4: usize = 4; const _5: usize = 5; const _6: usize = 6; const _7: usize = 7;
         const _8: usize = 8; const _9: usize = 9; const _10: usize = 10; const _11: usize = 11; const _12: usize = 12; const _13: usize = 13; const _14: usize = 14; const _15: usize = 15;
@@ -40,7 +40,7 @@ macro_rules! ident_to_value(
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(align(16))]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize),
@@ -61,9 +61,9 @@ pub struct AutoSimd<N>(pub N);
 )]
 pub struct AutoBoolSimd<N>(pub N);
 
-macro_rules! impl_bool_simd(
-    ($($t: ty, $lanes: expr, $($i: ident),*;)*) => {$(
-        impl_simd_value!($t, bool, $lanes, AutoSimd<$t> $(, $i)*;);
+macro_rules! impl_bool_simd (
+    ($($t: ty, $lanes: expr, $zero: expr, $one: expr, $($i: ident),*;)*) => {$(
+        impl_simd_value!($t, bool, $lanes, AutoSimd<$t>, $zero, $one $(, $i)*;);
 
         impl From<[bool; $lanes]> for AutoSimd<$t> {
             #[inline(always)]
@@ -201,7 +201,7 @@ macro_rules! impl_bool_simd(
     )*}
 );
 
-macro_rules! impl_scalar_subset_of_simd(
+macro_rules! impl_scalar_subset_of_simd (
     ($($t: ty),*) => {$(
         impl<N2> SubsetOf<AutoSimd<N2>> for $t
             where AutoSimd<N2>: SimdValue + Copy,
@@ -230,8 +230,8 @@ impl_scalar_subset_of_simd!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, 
 #[cfg(feature = "decimal")]
 impl_scalar_subset_of_simd!(d128);
 
-macro_rules! impl_simd_value(
-    ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $($i: ident),*;)*) => ($(
+macro_rules! impl_simd_value (
+    ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $zero: expr, $one: expr, $($i: ident),*;)*) => ($(
         impl ArrTransform for AutoSimd<$t> {
             #[inline(always)]
             fn map(self, f: impl Fn(Self::Element) -> Self::Element) -> Self {
@@ -281,6 +281,9 @@ macro_rules! impl_simd_value(
         }
 
         impl AutoSimd<$t> {
+            pub const ZERO: Self = AutoSimd([$zero; $lanes]);
+            pub const ONE: Self = AutoSimd([$one; $lanes]);
+
             pub fn new($($i: $elt),*) -> Self {
                 AutoSimd([$($i),*])
             }
@@ -333,9 +336,9 @@ macro_rules! impl_simd_value(
     )*)
 );
 
-macro_rules! impl_uint_simd(
-    ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $($i: ident),*;)*) => ($(
-        impl_simd_value!($t, $elt, $lanes, $bool $(, $i)*;);
+macro_rules! impl_uint_simd (
+    ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $zero: expr, $one: expr, $($i: ident),*;)*) => ($(
+        impl_simd_value!($t, $elt, $lanes, $bool, $zero, $one $(, $i)*;);
 
         impl From<[$elt; $lanes]> for AutoSimd<$t> {
             #[inline(always)]
@@ -618,9 +621,9 @@ macro_rules! impl_uint_simd(
     )*)
 );
 
-macro_rules! impl_int_simd(
-    ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $($i: ident),*;)*) => ($(
-        impl_uint_simd!($t, $elt, $lanes, $bool $(, $i)*;);
+macro_rules! impl_int_simd (
+    ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $zero: expr, $one: expr, $($i: ident),*;)*) => ($(
+        impl_uint_simd!($t, $elt, $lanes, $bool, $zero, $one $(, $i)*;);
 
         impl Neg for AutoSimd<$t> {
             type Output = Self;
@@ -633,9 +636,9 @@ macro_rules! impl_int_simd(
     )*)
 );
 
-macro_rules! impl_float_simd(
-    ($($t: ty, $elt: ty, $lanes: expr, $int: ty, $bool: ty, $($i: ident),*;)*) => ($(
-        impl_int_simd!($t, $elt, $lanes, $bool $(, $i)*;);
+macro_rules! impl_float_simd (
+    ($($t: ty, $elt: ty, $lanes: expr, $int: ty, $bool: ty, $zero: expr, $one: expr, $($i: ident),*;)*) => ($(
+        impl_int_simd!($t, $elt, $lanes, $bool, $zero, $one $(, $i)*;);
 
         // FIXME: this should be part of impl_int_simd
         // but those methods do not seem to be implemented
@@ -1469,77 +1472,77 @@ fn simd_complex_from_polar<N: SimdRealField>(r: N, theta: N) -> num_complex::Com
 }
 
 impl_float_simd!(
-    [f32; 2], f32, 2, [i32; 2], AutoBoolx2, _0, _1;
-    [f32; 4], f32, 4, [i32; 4], AutoBoolx4, _0, _1, _2, _3;
-    [f32; 8], f32, 8, [i32; 8], AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [f32; 16], f32, 16, [i32; 16], AutoBoolx16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    [f64; 2], f64, 2, [i64; 2], AutoBoolx2, _0, _1;
-    [f64; 4], f64, 4, [i64; 4], AutoBoolx4, _0, _1, _2, _3;
-    [f64; 8], f64, 8, [i64; 8], AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
+    [f32; 2], f32, 2, [i32; 2], AutoBoolx2, 0.0, 1.0, _0, _1;
+    [f32; 4], f32, 4, [i32; 4], AutoBoolx4, 0.0, 1.0, _0, _1, _2, _3;
+    [f32; 8], f32, 8, [i32; 8], AutoBoolx8, 0.0, 1.0, _0, _1, _2, _3, _4, _5, _6, _7;
+    [f32; 16], f32, 16, [i32; 16], AutoBoolx16, 0.0, 1.0, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+    [f64; 2], f64, 2, [i64; 2], AutoBoolx2, 0.0, 1.0, _0, _1;
+    [f64; 4], f64, 4, [i64; 4], AutoBoolx4, 0.0, 1.0, _0, _1, _2, _3;
+    [f64; 8], f64, 8, [i64; 8], AutoBoolx8, 0.0, 1.0, _0, _1, _2, _3, _4, _5, _6, _7;
 );
 
 impl_int_simd!(
-    [i128; 1], i128, 1, AutoBoolx1, _0;
-    [i128; 2], i128, 2, AutoBoolx2, _0, _1;
-    [i128; 4], i128, 4, AutoBoolx4, _0, _1, _2, _3;
-    [i16; 2], i16, 2, AutoBoolx2, _0, _1;
-    [i16; 4], i16, 4, AutoBoolx4, _0, _1, _2, _3;
-    [i16; 8], i16, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [i16; 16], i16, 16, AutoBoolx16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    [i16; 32], i16, 32, AutoBoolx32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    [i32; 2], i32, 2, AutoBoolx2, _0, _1;
-    [i32; 4], i32, 4, AutoBoolx4, _0, _1, _2, _3;
-    [i32; 8], i32, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [i32; 16], i32, 16, AutoBoolx16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    [i64; 2], i64, 2, AutoBoolx2, _0, _1;
-    [i64; 4], i64, 4, AutoBoolx4, _0, _1, _2, _3;
-    [i64; 8], i64, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [i8; 2], i8, 2, AutoBoolx2, _0, _1;
-    [i8; 4], i8, 4, AutoBoolx4, _0, _1, _2, _3;
-    [i8; 8], i8, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [i8; 16], i8, 16, AutoBoolx16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    [i8; 32], i8, 32, AutoBoolx32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    // [i8; 64], i8, 64, AutoBoolx64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    [isize; 2], isize, 2, AutoBoolx2, _0, _1;
-    [isize; 4], isize, 4, AutoBoolx4, _0, _1, _2, _3;
-    [isize; 8], isize, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
+    [i128; 1], i128, 1, AutoBoolx1, 0, 1, _0;
+    [i128; 2], i128, 2, AutoBoolx2, 0, 1, _0, _1;
+    [i128; 4], i128, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [i16; 2], i16, 2, AutoBoolx2, 0, 1, _0, _1;
+    [i16; 4], i16, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [i16; 8], i16, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
+    [i16; 16], i16, 16, AutoBoolx16, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+    [i16; 32], i16, 32, AutoBoolx32, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
+    [i32; 2], i32, 2, AutoBoolx2, 0, 1, _0, _1;
+    [i32; 4], i32, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [i32; 8], i32, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
+    [i32; 16], i32, 16, AutoBoolx16, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+    [i64; 2], i64, 2, AutoBoolx2, 0, 1, _0, _1;
+    [i64; 4], i64, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [i64; 8], i64, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
+    [i8; 2], i8, 2, AutoBoolx2, 0, 1, _0, _1;
+    [i8; 4], i8, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [i8; 8], i8, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
+    [i8; 16], i8, 16, AutoBoolx16, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+    [i8; 32], i8, 32, AutoBoolx32, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
+    // [i8; 64], i8, 64, AutoBoolx64, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
+    [isize; 2], isize, 2, AutoBoolx2, 0, 1, _0, _1;
+    [isize; 4], isize, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [isize; 8], isize, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
 );
 
 impl_uint_simd!(
-    [u128; 1], u128, 1, AutoBoolx1, _0;
-    [u128; 2], u128, 2, AutoBoolx2, _0, _1;
-    [u128; 4], u128, 4, AutoBoolx4, _0, _1, _2, _3;
-    [u16; 2], u16, 2, AutoBoolx2, _0, _1;
-    [u16; 4], u16, 4, AutoBoolx4, _0, _1, _2, _3;
-    [u16; 8], u16, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [u16; 16], u16, 16, AutoBoolx16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    [u16; 32], u16, 32, AutoBoolx32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    [u32; 2], u32, 2, AutoBoolx2, _0, _1;
-    [u32; 4], u32, 4, AutoBoolx4, _0, _1, _2, _3;
-    [u32; 8], u32, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [u32; 16], u32, 16, AutoBoolx16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    [u64; 2], u64, 2, AutoBoolx2, _0, _1;
-    [u64; 4], u64, 4, AutoBoolx4, _0, _1, _2, _3;
-    [u64; 8], u64, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [u8; 2], u8, 2, AutoBoolx2, _0, _1;
-    [u8; 4], u8, 4, AutoBoolx4, _0, _1, _2, _3;
-    [u8; 8], u8, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [u8; 16], u8, 16, AutoBoolx16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    [u8; 32], u8, 32, AutoBoolx32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    // [u8; 64], u8, 64, AutoBoolx64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    [usize; 2], usize, 2, AutoBoolx2, _0, _1;
-    [usize; 4], usize, 4, AutoBoolx4, _0, _1, _2, _3;
-    [usize; 8], usize, 8, AutoBoolx8, _0, _1, _2, _3, _4, _5, _6, _7;
+    [u128; 1], u128, 1, AutoBoolx1, 0, 1, _0;
+    [u128; 2], u128, 2, AutoBoolx2, 0, 1, _0, _1;
+    [u128; 4], u128, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [u16; 2], u16, 2, AutoBoolx2, 0, 1, _0, _1;
+    [u16; 4], u16, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [u16; 8], u16, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
+    [u16; 16], u16, 16, AutoBoolx16, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+    [u16; 32], u16, 32, AutoBoolx32, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
+    [u32; 2], u32, 2, AutoBoolx2, 0, 1, _0, _1;
+    [u32; 4], u32, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [u32; 8], u32, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
+    [u32; 16], u32, 16, AutoBoolx16, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+    [u64; 2], u64, 2, AutoBoolx2, 0, 1, _0, _1;
+    [u64; 4], u64, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [u64; 8], u64, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
+    [u8; 2], u8, 2, AutoBoolx2, 0, 1, _0, _1;
+    [u8; 4], u8, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [u8; 8], u8, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
+    [u8; 16], u8, 16, AutoBoolx16, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+    [u8; 32], u8, 32, AutoBoolx32, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
+    // [u8; 64], u8, 64, AutoBoolx64, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
+    [usize; 2], usize, 2, AutoBoolx2, 0, 1, _0, _1;
+    [usize; 4], usize, 4, AutoBoolx4, 0, 1, _0, _1, _2, _3;
+    [usize; 8], usize, 8, AutoBoolx8, 0, 1, _0, _1, _2, _3, _4, _5, _6, _7;
 );
 
 impl_bool_simd!(
-    [bool; 1], 1, _0;
-    [bool; 2], 2, _0, _1;
-    [bool; 4], 4, _0, _1, _2, _3;
-    [bool; 8], 8, _0, _1, _2, _3, _4, _5, _6, _7;
-    [bool; 16], 16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    [bool; 32], 32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    // [bool; 64], 64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
+    [bool; 1], 1, false, true, _0;
+    [bool; 2], 2, false, true, _0, _1;
+    [bool; 4], 4, false, true, _0, _1, _2, _3;
+    [bool; 8], 8, false, true, _0, _1, _2, _3, _4, _5, _6, _7;
+    [bool; 16], 16, false, true, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+    [bool; 32], 32, false, true, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
+    // [bool; 64], 64, 0, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
 );
 
 //
