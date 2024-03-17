@@ -45,7 +45,7 @@ macro_rules! ident_to_value (
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
 pub struct Simd<N>(pub N);
 
 macro_rules! impl_bool_simd (
@@ -288,6 +288,9 @@ macro_rules! impl_simd_value (
         }
 
         impl Simd<$t> {
+            pub const ZERO: Self = Simd(<$t>::from_array([0 as $elt; <$t>::LEN]));
+            pub const ONE: Self = Simd(<$t>::from_array([1 as $elt; <$t>::LEN]));
+
             #[inline]
             pub fn new($($i: $elt),*) -> Self {
                 Simd(<$t>::from_array([$($i),*]))

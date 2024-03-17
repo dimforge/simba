@@ -40,7 +40,7 @@ macro_rules! ident_to_value (
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(align(16))]
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
 #[cfg_attr(
     feature = "rkyv",
     derive(rkyv::Archive, rkyv::Deserialize, rkyv::Serialize),
@@ -63,6 +63,15 @@ pub struct AutoBoolSimd<N>(pub N);
 macro_rules! impl_bool_simd (
     ($($t: ty, $lanes: expr, $($i: ident),*;)*) => {$(
         impl_simd_value!($t, bool, $lanes, AutoSimd<$t> $(, $i)*;);
+
+        impl AutoSimd<$t> {
+            pub const ZERO: Self = AutoSimd([false; $lanes]);
+            pub const ONE: Self = AutoSimd([true; $lanes]);
+
+            pub fn new($($i: bool),*) -> Self {
+                AutoSimd([$($i),*])
+            }
+        }
 
         impl From<[bool; $lanes]> for AutoSimd<$t> {
             #[inline(always)]
@@ -280,12 +289,6 @@ macro_rules! impl_simd_value (
             }
         }
 
-        impl AutoSimd<$t> {
-            pub fn new($($i: $elt),*) -> Self {
-                AutoSimd([$($i),*])
-            }
-        }
-
         impl PrimitiveSimdValue for AutoSimd<$t> {}
 
         impl SimdValue for AutoSimd<$t> {
@@ -333,6 +336,15 @@ macro_rules! impl_simd_value (
 macro_rules! impl_uint_simd (
     ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $($i: ident),*;)*) => ($(
         impl_simd_value!($t, $elt, $lanes, $bool $(, $i)*;);
+
+        impl AutoSimd<$t> {
+            pub const ZERO: Self = AutoSimd([0 as $elt; $lanes]);
+            pub const ONE: Self = AutoSimd([1 as $elt; $lanes]);
+
+            pub fn new($($i: $elt),*) -> Self {
+                AutoSimd([$($i),*])
+            }
+        }
 
         impl From<[$elt; $lanes]> for AutoSimd<$t> {
             #[inline(always)]
@@ -1534,7 +1546,7 @@ impl_bool_simd!(
     [bool; 8], 8, _0, _1, _2, _3, _4, _5, _6, _7;
     [bool; 16], 16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
     [bool; 32], 32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    // [bool; 64], 64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
+    // [bool; 64], 64, 0, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
 );
 
 //
