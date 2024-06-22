@@ -12,24 +12,25 @@ use crate::simd::{SimdRealField, SimdValue};
 /// Each lane of an SIMD complex field should contain one complex field.
 #[allow(missing_docs)]
 pub trait SimdComplexField:
-    SubsetOf<Self>
-    + SupersetOf<f64>
-    + Field
-    + Clone
-    + Neg<Output = Self>
+SubsetOf<Self>
++ SupersetOf<f32>
++ SupersetOf<f64>
++ Field
++ Clone
++ Neg<Output=Self>
 //    + MeetSemilattice
 //    + JoinSemilattice
-    + Send
-    + Sync
-    + Any
-    + 'static
-    + Debug
-    + NumAssignOps
-    + NumOps
-    + PartialEq
++ Send
++ Sync
++ Any
++ 'static
++ Debug
++ NumAssignOps
++ NumOps
++ PartialEq
 {
     /// Type of the coefficients of a complex number.
-    type SimdRealField: SimdRealField<SimdBool = <Self as SimdValue>::SimdBool>;
+    type SimdRealField: SimdRealField<SimdBool=<Self as SimdValue>::SimdBool>;
     complex_trait_methods!(SimdRealField, simd_);
 
     /// Computes the sum of all the lanes of `self`.

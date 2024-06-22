@@ -5,6 +5,8 @@
 - Add the `portable_simd` feature for supporting `std::simd`.
 - The `ClosedAdd, ClosedMul, etc.` traits no longer require `AddAssign, MulAssign`. Instead they are required for new
   traits named `ClosedAddAssign, ClosedMulAssign, etc.`
+- The `ComplexField` and `SimdComplexField` (and, by extension, `RealField` and `SimdRealField`) traits now depend on the
+  `SupersetOf<f32>` trait in addition to `SupersetOf<f64>`.
 
 ## Release v0.8.1 (04 Apr. 2023)
 - Add implementation of `rkyv` serialization/deserialization to the `Wide*` wrapper types.
