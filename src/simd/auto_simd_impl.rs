@@ -219,7 +219,7 @@ macro_rules! impl_scalar_subset_of_simd (
             fn is_in_subset(c: &AutoSimd<N2>) -> bool {
                 let elt0 = c.extract(0);
                 elt0.is_in_subset() &&
-                (1..AutoSimd::<N2>::lanes()).all(|i| c.extract(i) == elt0)
+                (1..AutoSimd::<N2>::LANES).all(|i| c.extract(i) == elt0)
             }
         }
     )*}
@@ -265,13 +265,14 @@ macro_rules! impl_simd_value (
 
         impl fmt::Display for AutoSimd<$t> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                if Self::lanes() == 1 {
+                if Self::LANES == 1 {
                     return self.extract(0).fmt(f);
                 }
 
                 write!(f, "({}", self.extract(0))?;
 
-                for i in 1..Self::lanes() {
+                #[allow(clippy::reversed_empty_ranges)] // Needed for LANES == 1 that’s in a different code path.
+                for i in 1..Self::LANES {
                     write!(f, ", {}", self.extract(i))?;
                 }
 
@@ -288,13 +289,10 @@ macro_rules! impl_simd_value (
         impl PrimitiveSimdValue for AutoSimd<$t> {}
 
         impl SimdValue for AutoSimd<$t> {
+            const LANES: usize = $lanes;
             type Element = $elt;
             type SimdBool = $bool;
 
-            #[inline(always)]
-            fn lanes() -> usize {
-                $lanes
-            }
 
             #[inline(always)]
             fn splat(val: Self::Element) -> Self {

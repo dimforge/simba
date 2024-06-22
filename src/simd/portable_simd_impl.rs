@@ -52,13 +52,13 @@ macro_rules! impl_bool_simd (
     ($($t: ty, $lanes: literal, $($i: ident),*;)*) => {$(
         impl fmt::Display for Simd<$t> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                if Self::lanes() == 1 {
+                if Self::LANES == 1 {
                     return self.extract(0).fmt(f);
                 }
 
                 write!(f, "({}", self.extract(0))?;
 
-                for i in 1..Self::lanes() {
+                for i in 1..Self::LANES {
                     write!(f, ", {}", self.extract(i))?;
                 }
 
@@ -76,13 +76,9 @@ macro_rules! impl_bool_simd (
         impl PrimitiveSimdValue for Simd<$t> {}
 
         impl SimdValue for Simd<$t> {
+            const LANES: usize = $lanes;
             type Element = bool;
             type SimdBool = Simd<$t>;
-
-            #[inline(always)]
-            fn lanes() -> usize {
-                $lanes
-            }
 
             #[inline(always)]
             fn splat(val: Self::Element) -> Self {
@@ -263,7 +259,7 @@ macro_rules! impl_scalar_subset_of_simd (
             fn is_in_subset(c: &Simd<N2>) -> bool {
                 let elt0 = c.extract(0);
                 elt0.is_in_subset() &&
-                (1..Simd::<N2>::lanes()).all(|i| c.extract(i) == elt0)
+                (1..Simd::<N2>::LANES).all(|i| c.extract(i) == elt0)
             }
         }
     )*}
@@ -277,13 +273,13 @@ macro_rules! impl_simd_value (
     ($($t: ty, $elt: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl fmt::Display for Simd<$t> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                if Self::lanes() == 1 {
+                if Self::LANES == 1 {
                     return self.extract(0).fmt(f);
                 }
 
                 write!(f, "({}", self.extract(0))?;
 
-                for i in 1..Self::lanes() {
+                for i in 1..Self::LANES {
                     write!(f, ", {}", self.extract(i))?;
                 }
 
@@ -301,13 +297,9 @@ macro_rules! impl_simd_value (
         impl PrimitiveSimdValue for Simd<$t> {}
 
         impl SimdValue for Simd<$t> {
+            const LANES: usize = <$t>::LEN;
             type Element = $elt;
             type SimdBool = $bool;
-
-            #[inline(always)]
-            fn lanes() -> usize {
-                <$t>::LEN
-            }
 
             #[inline(always)]
             fn splat(val: Self::Element) -> Self {
@@ -351,7 +343,7 @@ macro_rules! impl_uint_simd (
             ///
             /// # Panics
             ///
-            /// If `slice.len() < Self::lanes()`.
+            /// If `slice.len() < Self::LANES`.
             #[inline]
             pub fn from_slice_unaligned(slice: &[$elt]) -> Self {
                 Simd(<$t>::from_slice(slice))
@@ -1075,7 +1067,7 @@ macro_rules! impl_float_simd (
             #[inline(always)]
             fn simd_horizontal_product(self) -> Self::Element {
                 let mut prod = self.extract(0);
-                for ii in 1..Self::lanes() {
+                for ii in 1..Self::LANES {
                     prod *= self.extract(ii)
                 }
                 prod
@@ -1589,9 +1581,9 @@ impl_bool_simd!(
 //
 //macro_rules! impl_simd_complex_from(
 //    ($($t: ty, $elt: ty $(, $i: expr)*;)*) => ($(
-//        impl From<[num_complex::Complex<$elt>; <$t>::lanes()]> for num_complex::Complex<Simd<$t>> {
+//        impl From<[num_complex::Complex<$elt>; <$t>::LANES]> for num_complex::Complex<Simd<$t>> {
 //            #[inline(always)]
-//            fn from(vals: [num_complex::Complex<$elt>; <$t>::lanes()]) -> Self {
+//            fn from(vals: [num_complex::Complex<$elt>; <$t>::LANES]) -> Self {
 //                num_complex::Complex {
 //                    re: <$t>::from([$(vals[$i].re),*]),
 //                    im: <$t>::from([$(vals[$i].im),*]),

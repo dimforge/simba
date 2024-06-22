@@ -2,32 +2,32 @@ use crate::simd::SimdBool;
 
 /// Base trait for every SIMD types.
 pub trait SimdValue: Sized {
+    /// The number of lanes of this SIMD value.
+    const LANES: usize;
     /// The type of the elements of each lane of this SIMD value.
     type Element: SimdValue<Element = Self::Element, SimdBool = bool>;
     /// Type of the result of comparing two SIMD values like `self`.
     type SimdBool: SimdBool;
 
-    /// The number of lanes of this SIMD value.
-    fn lanes() -> usize;
     /// Initializes an SIMD value with each lanes set to `val`.
     fn splat(val: Self::Element) -> Self;
     /// Extracts the i-th lane of `self`.
     ///
-    /// Panics if `i >= Self::lanes()`.
+    /// Panics if `i >= Self::LANES`.
     fn extract(&self, i: usize) -> Self::Element;
     /// Extracts the i-th lane of `self` without bound-checking.
     ///
     /// # Safety
-    /// Undefined behavior if `i >= Self::lanes()`.
+    /// Undefined behavior if `i >= Self::LANES`.
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element;
     /// Replaces the i-th lane of `self` by `val`.
     ///
-    /// Panics if `i >= Self::lanes()`.
+    /// Panics if `i >= Self::LANES`.
     fn replace(&mut self, i: usize, val: Self::Element);
     /// Replaces the i-th lane of `self` by `val` without bound-checking.
     ///
     /// # Safety
-    /// Undefined behavior if `i >= Self::lanes()`.
+    /// Undefined behavior if `i >= Self::LANES`.
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element);
 
     /// Merges `self` and `other` depending on the lanes of `cond`.
@@ -48,7 +48,7 @@ pub trait SimdValue: Sized {
     {
         let mut result = self.clone();
 
-        for i in 0..Self::lanes() {
+        for i in 0..Self::LANES {
             unsafe { result.replace_unchecked(i, f(self.extract_unchecked(i))) }
         }
 
@@ -71,7 +71,7 @@ pub trait SimdValue: Sized {
     {
         let mut result = self.clone();
 
-        for i in 0..Self::lanes() {
+        for i in 0..Self::LANES {
             unsafe {
                 let a = self.extract_unchecked(i);
                 let b = b.extract_unchecked(i);
@@ -92,13 +92,9 @@ pub trait SimdValue: Sized {
 pub trait PrimitiveSimdValue: Copy + SimdValue {}
 
 impl<N: SimdValue> SimdValue for num_complex::Complex<N> {
+    const LANES: usize = N::LANES;
     type Element = num_complex::Complex<N::Element>;
     type SimdBool = N::SimdBool;
-
-    #[inline(always)]
-    fn lanes() -> usize {
-        N::lanes()
-    }
 
     #[inline(always)]
     fn splat(val: Self::Element) -> Self {
@@ -151,13 +147,9 @@ macro_rules! impl_primitive_simd_value_for_scalar (
     ($($t: ty),*) => {$(
         impl PrimitiveSimdValue for $t {}
         impl SimdValue for $t {
+            const LANES: usize = 1;
             type Element = $t;
             type SimdBool = bool;
-
-            #[inline(always)]
-            fn lanes() -> usize {
-                1
-            }
 
             #[inline(always)]
             fn splat(val: Self::Element) -> Self {

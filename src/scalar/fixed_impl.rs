@@ -95,13 +95,9 @@ macro_rules! impl_fixed_type (
 
         impl<Fract: $LeEqDim> PrimitiveSimdValue for $FixedI<Fract> {}
         impl<Fract: $LeEqDim> SimdValue for $FixedI<Fract> {
+            const LANES: usize = 1;
             type Element = Self;
             type SimdBool = bool;
-
-            #[inline(always)]
-            fn lanes() -> usize {
-                1
-            }
 
             #[inline(always)]
             fn splat(val: Self::Element) -> Self {
