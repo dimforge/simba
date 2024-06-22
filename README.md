@@ -19,7 +19,7 @@
 </p>
 <p align = "center">
     <strong>
-        <a href="https://docs.rs/simba">Documentation</a> | <a href="https://discourse.nphysics.org/c/simba">Forum</a>
+        <a href="https://docs.rs/simba">Documentation</a>
     </strong>
 </p>
 
@@ -31,19 +31,3 @@
 </p>
 
 -----
-
-## Acknowledgements
-Simba is supported by our platinum sponsors:
-<p>
-  <a href="https://embark-studios.com">
-    <img src="https://www.embark.dev/img/logo_black.png" width="301px">
-  </a>
-</p>
-
-And our gold sponsors:
-
-<p>
-  <a href="https://fragcolor.com">
-    <img src="https://dimforge.com/img/fragcolor_logo1_color_black.svg" width="151px">
-  </a>
-</p>
