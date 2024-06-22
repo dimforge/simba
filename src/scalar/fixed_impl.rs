@@ -316,6 +316,28 @@ macro_rules! impl_fixed_type (
             }
         }
 
+        impl<Fract: $LeEqDim> SubsetOf<$FixedI<Fract>> for f32 {
+            #[inline]
+            fn to_superset(&self) -> $FixedI<Fract> {
+                $FixedI(fixed::$FixedI::from_num(*self))
+            }
+
+            #[inline]
+            fn from_superset(element: &$FixedI<Fract>) -> Option<Self> {
+                Some(Self::from_superset_unchecked(element))
+            }
+
+            #[inline]
+            fn from_superset_unchecked(element: &$FixedI<Fract>) -> Self {
+                element.0.to_num::<f32>()
+            }
+
+            #[inline]
+            fn is_in_subset(_: &$FixedI<Fract>) -> bool {
+                true
+            }
+        }
+
         impl<Fract: $LeEqDim> SubsetOf<$FixedI<Fract>> for $FixedI<Fract> {
             #[inline]
             fn to_superset(&self) -> $FixedI<Fract> {
