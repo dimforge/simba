@@ -53,7 +53,7 @@ macro_rules! impl_rkyv {
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct WideF32x4(pub wide::f32x4);
 
 #[cfg(feature = "rkyv")]
@@ -63,7 +63,7 @@ impl_rkyv!(WideF32x4, [f32; 4]);
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct WideBoolF32x4(pub wide::f32x4);
 
 #[cfg(feature = "rkyv")]
@@ -73,7 +73,7 @@ impl_rkyv!(WideBoolF32x4, [f32; 4]);
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct WideF32x8(pub wide::f32x8);
 
 #[cfg(feature = "rkyv")]
@@ -83,7 +83,7 @@ impl_rkyv!(WideF32x8, [f32; 8]);
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct WideBoolF32x8(pub wide::f32x8);
 
 #[cfg(feature = "rkyv")]
@@ -93,7 +93,7 @@ impl_rkyv!(WideBoolF32x8, [f32; 8]);
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct WideF64x4(pub wide::f64x4);
 
 #[cfg(feature = "rkyv")]
@@ -103,7 +103,7 @@ impl_rkyv!(WideF64x4, [f64; 4]);
 ///
 /// This is needed to overcome the orphan rules.
 #[repr(transparent)]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct WideBoolF64x4(pub wide::f64x4);
 
 #[cfg(feature = "rkyv")]
@@ -115,6 +115,9 @@ macro_rules! impl_wide_f32 (
         impl PrimitiveSimdValue for $WideBoolF32xX {}
 
         impl $WideF32xX {
+            pub const ZERO: Self = $WideF32xX(<wide::$f32xX>::ZERO);
+            pub const ONE: Self = $WideF32xX(<wide::$f32xX>::ONE);
+
             #[inline(always)]
             fn into_arr(self) -> [$f32; $lanes] {
                 self.0.into()
