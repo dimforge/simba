@@ -1,4 +1,4 @@
-## Unreleased
+## Release v0.9.0 (22 June 2023)
 - The `cuda` feature has been removed, as the toolchain it depends on is long abandoned.
 - The `packed_simd` feature has been removes as it has been incompatible with the `nightly` compiler for several months.
   Consider using the `portable_simd` feature instead.
