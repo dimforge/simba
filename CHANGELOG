@@ -1,5 +1,10 @@
 ## Unreleased
 - The `cuda` feature has been removed, as the toolchain it depends on is long abandoned.
+- The `packed_simd` feature has been removes as it has been incompatible with the `nightly` compiler for several months.
+  Consider using the `portable_simd` feature instead.
+- Add the `portable_simd` feature for supporting `std::simd`.
+- The `ClosedAdd, ClosedMul, etc.` traits no longer require `AddAssign, MulAssign`. Instead they are required for new
+  traits named `ClosedAddAssign, ClosedMulAssign, etc.`
 
 ## Release v0.8.1 (04 Apr. 2023)
 - Add implementation of `rkyv` serialization/deserialization to the `Wide*` wrapper types.
