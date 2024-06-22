@@ -109,7 +109,7 @@ pub struct WideBoolF64x4(pub wide::f64x4);
 #[cfg(feature = "rkyv")]
 impl_rkyv!(WideBoolF64x4, [f64; 4]);
 
-macro_rules! impl_wide_f32(
+macro_rules! impl_wide_f32 (
     ($f32: ident, $f32xX: ident, $WideF32xX: ident, $WideBoolF32xX: ident, $lanes: expr; $($ii: expr),+) => {
         impl PrimitiveSimdValue for $WideF32xX {}
         impl PrimitiveSimdValue for $WideBoolF32xX {}
@@ -705,7 +705,7 @@ macro_rules! impl_wide_f32(
 
             #[inline(always)]
             fn simd_signum(&self) -> Self {
-                // FIXME: is there a more efficient way?
+                // TODO: is there a more efficient way?
                 self.map(|x| x.signum())
             }
 
@@ -1091,7 +1091,7 @@ macro_rules! impl_wide_f32(
             fn simd_horizontal_product(self) -> Self::Element {
                 let mut prod = self.extract(0);
                 for ii in 1..Self::lanes() {
-                    prod = prod * self.extract(ii)
+                    prod *= self.extract(ii)
                 }
                 prod
             }
@@ -1222,7 +1222,7 @@ macro_rules! impl_wide_f32(
 
             #[inline]
             fn simd_powi(self, n: i32) -> Self {
-                // FIXME: is there a more accurate solution?
+                // TODO: is there a more accurate solution?
                 let n = <$WideF32xX>::from_subset(&(n as f64));
                 self.simd_powf(n)
             }
@@ -1514,7 +1514,7 @@ macro_rules! impl_wide_f32(
     }
 );
 
-macro_rules! impl_scalar_subset_of_simd(
+macro_rules! impl_scalar_subset_of_simd (
     ($WideF32xX: ty, $f32: ty, $lanes: expr; $($t: ty),*) => {$(
         impl SubsetOf<$WideF32xX> for $t {
             #[inline(always)]

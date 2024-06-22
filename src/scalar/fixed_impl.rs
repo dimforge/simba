@@ -17,7 +17,7 @@ use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
 
-macro_rules! impl_fixed_type(
+macro_rules! impl_fixed_type (
     ($($FixedI: ident, $Int: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident, $LeEqDim4: ident;)*) => {$(
         #[derive(Copy, Clone)]
         #[repr(transparent)]
@@ -58,7 +58,7 @@ macro_rules! impl_fixed_type(
         impl<Fract: $LeEqDim> PartialOrd for $FixedI<Fract> {
             #[inline(always)]
             fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-                self.0.partial_cmp(&other.0)
+                Some(self.cmp(other))
             }
         }
 

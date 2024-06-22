@@ -12,11 +12,11 @@ use num_complex::Complex;
 /// represent_, independently from their actual implementation details and limitations. For
 /// example:
 /// * f32 and f64 are both supposed to represent reals and are thus considered equal (even if in
-/// practice f64 has more elements).
+///   practice f64 has more elements).
 /// * u32 and i8 are respectively supposed to represent natural and relative numbers. Thus, u32 is
-/// a subset of i8.
+///   a subset of i8.
 /// * A quaternion and a 3x3 orthogonal matrix with unit determinant are both sets of rotations.
-/// They can thus be considered equal.
+///   They can thus be considered equal.
 ///
 /// In other words, implementation details due to machine limitations are ignored (otherwise we
 /// could not even, e.g., convert a u64 to an i64). If considering those limitations are
@@ -52,11 +52,11 @@ pub trait SubsetOf<T>: Sized {
 /// represent_, independently from their actual implementation details and limitations. For
 /// example:
 /// * f32 and f64 are both supposed to represent reals and are thus considered equal (even if in
-/// practice f64 has more elements).
+///   practice f64 has more elements).
 /// * u32 and i8 are respectively supposed to represent natural and relative numbers. Thus, i8 is
-/// a superset of u32.
+///   a superset of u32.
 /// * A quaternion and a 3x3 orthogonal matrix with unit determinant are both sets of rotations.
-/// They can thus be considered equal.
+///   They can thus be considered equal.
 ///
 /// In other words, implementation details due to machine limitations are ignored (otherwise we
 /// could not even, e.g., convert a u64 to an i64). If considering those limitations are
@@ -106,7 +106,7 @@ impl<SS: SubsetOf<SP>, SP> SupersetOf<SS> for SP {
     }
 }
 
-macro_rules! impl_subset(
+macro_rules! impl_subset (
     ($($subset: ty as $( $superset: ty),+ );* $(;)*) => {
         $($(
         impl SubsetOf<$superset> for $subset {
@@ -189,7 +189,7 @@ impl<N1, N2: SupersetOf<N1>> SubsetOf<Complex<N2>> for Complex<N1> {
     }
 }
 
-macro_rules! impl_scalar_subset_of_complex(
+macro_rules! impl_scalar_subset_of_complex (
     ($($t: ident),*) => {$(
         impl<N2: Zero + SupersetOf<$t>> SubsetOf<Complex<N2>> for $t {
             #[inline]
