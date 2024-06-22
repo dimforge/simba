@@ -153,13 +153,9 @@ macro_rules! impl_wide_f32 (
         }
 
         impl SimdValue for $WideF32xX {
+            const LANES: usize = $lanes;
             type Element = $f32;
             type SimdBool = $WideBoolF32xX;
-
-            #[inline(always)]
-            fn lanes() -> usize {
-                $lanes
-            }
 
             #[inline(always)]
             fn splat(val: Self::Element) -> Self {
@@ -197,13 +193,9 @@ macro_rules! impl_wide_f32 (
         }
 
         impl SimdValue for $WideBoolF32xX {
+            const LANES: usize = $lanes;
             type Element = bool;
             type SimdBool = Self;
-
-            #[inline(always)]
-            fn lanes() -> usize {
-                $lanes
-            }
 
             #[inline(always)]
             fn splat(val: bool) -> Self {
@@ -1090,7 +1082,7 @@ macro_rules! impl_wide_f32 (
             #[inline(always)]
             fn simd_horizontal_product(self) -> Self::Element {
                 let mut prod = self.extract(0);
-                for ii in 1..Self::lanes() {
+                for ii in 1..Self::LANES {
                     prod *= self.extract(ii)
                 }
                 prod
