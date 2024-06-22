@@ -11,7 +11,7 @@ use num::Float;
 //#[cfg(feature = "decimal")]
 //use decimal::d128;
 
-macro_rules! complex_trait_methods(
+macro_rules! complex_trait_methods (
     ($RealField: ident $(, $prefix: ident)*) => {
         paste::item! {
             /// Builds a pure-real complex number from the given value.
@@ -160,20 +160,20 @@ macro_rules! complex_trait_methods(
 // allow a blanket impl: impl<T: Clone> SubsetOf<T> for T { ... }
 #[allow(missing_docs)]
 pub trait ComplexField:
-    SubsetOf<Self>
-    + SupersetOf<f64>
-    + FromPrimitive
-    + Field<Element = Self, SimdBool = bool>
-    + Neg<Output = Self>
-    + Clone
+SubsetOf<Self>
++ SupersetOf<f64>
++ FromPrimitive
++ Field<Element=Self, SimdBool=bool>
++ Neg<Output=Self>
++ Clone
 //    + MeetSemilattice
 //    + JoinSemilattice
-    + Send
-    + Sync
-    + Any
-    + 'static
-    + Debug
-    + Display
++ Send
++ Sync
++ Any
++ 'static
++ Debug
++ Display
 {
     type RealField: RealField;
     complex_trait_methods!(RealField);
@@ -183,7 +183,7 @@ pub trait ComplexField:
 }
 
 #[cfg(not(feature = "libm_force"))]
-macro_rules! impl_complex(
+macro_rules! impl_complex (
     ($($T:ty, $M:ident, $libm: ident);*) => ($(
         impl ComplexField for $T {
             type RealField = $T;
@@ -469,8 +469,6 @@ macro_rules! impl_complex(
 );
 
 #[cfg(all(
-    not(target_arch = "nvptx"),
-    not(target_arch = "nvptx64"),
     not(feature = "std"),
     not(feature = "libm_force"),
     feature = "libm"
@@ -1443,7 +1441,7 @@ impl<N: RealField + PartialOrd> ComplexField for num_complex::Complex<N> {
         let two = one.clone() + one.clone();
         two.clone()
             * (((self.clone() + one.clone()) / two.clone()).sqrt() + ((self - one) / two).sqrt())
-                .ln()
+            .ln()
     }
 
     /// Computes the principal value of inverse hyperbolic tangent of `self`.
