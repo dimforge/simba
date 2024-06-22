@@ -13,11 +13,11 @@ use num::Float;
 /// Trait shared by all reals.
 #[allow(missing_docs)]
 pub trait RealField:
-ComplexField<RealField=Self>
-+ RelativeEq<Epsilon=Self>
-+ UlpsEq<Epsilon=Self>
-+ Signed
-+ PartialOrd
+    ComplexField<RealField = Self>
+    + RelativeEq<Epsilon = Self>
+    + UlpsEq<Epsilon = Self>
+    + Signed
+    + PartialOrd
 {
     /// Is the sign of this real number positive?
     fn is_sign_positive(&self) -> bool;
@@ -208,11 +208,7 @@ macro_rules! impl_real (
     )*)
 );
 
-#[cfg(all(
-    not(feature = "std"),
-    not(feature = "libm_force"),
-    feature = "libm"
-))]
+#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 impl_real!(f32, f32, Float, Float; f64, f64, Float, Float);
 #[cfg(all(feature = "std", not(feature = "libm_force")))]
 impl_real!(f32, f32, f32, f32; f64, f64, f64, f64);

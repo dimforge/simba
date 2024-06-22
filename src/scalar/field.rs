@@ -3,19 +3,19 @@ use num::NumAssign;
 pub use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 /// Trait __alias__ for `Add` with result of type `Self`.
-pub trait ClosedAdd<Right = Self>: Sized + Add<Right, Output=Self> {}
+pub trait ClosedAdd<Right = Self>: Sized + Add<Right, Output = Self> {}
 
 /// Trait __alias__ for `Sub` with result of type `Self`.
-pub trait ClosedSub<Right = Self>: Sized + Sub<Right, Output=Self> {}
+pub trait ClosedSub<Right = Self>: Sized + Sub<Right, Output = Self> {}
 
 /// Trait __alias__ for `Mul` with result of type `Self`.
-pub trait ClosedMul<Right = Self>: Sized + Mul<Right, Output=Self> {}
+pub trait ClosedMul<Right = Self>: Sized + Mul<Right, Output = Self> {}
 
 /// Trait __alias__ for `Div` with result of type `Self`.
-pub trait ClosedDiv<Right = Self>: Sized + Div<Right, Output=Self> {}
+pub trait ClosedDiv<Right = Self>: Sized + Div<Right, Output = Self> {}
 
 /// Trait __alias__ for `Neg` with result of type `Self`.
-pub trait ClosedNeg: Sized + Neg<Output=Self> {}
+pub trait ClosedNeg: Sized + Neg<Output = Self> {}
 
 /// Trait __alias__ for `Add` and `AddAssign` with result of type `Self`.
 pub trait ClosedAddAssign<Right = Self>: ClosedAdd<Right> + AddAssign<Right> {}
@@ -29,15 +29,15 @@ pub trait ClosedMulAssign<Right = Self>: ClosedMul<Right> + MulAssign<Right> {}
 /// Trait __alias__ for `Div` and `DivAssign` with result of type `Self`.
 pub trait ClosedDivAssign<Right = Self>: ClosedDiv<Right> + DivAssign<Right> {}
 
-impl<T, Right> ClosedAdd<Right> for T where T: Add<Right, Output=T> + AddAssign<Right> {}
+impl<T, Right> ClosedAdd<Right> for T where T: Add<Right, Output = T> + AddAssign<Right> {}
 
-impl<T, Right> ClosedSub<Right> for T where T: Sub<Right, Output=T> + SubAssign<Right> {}
+impl<T, Right> ClosedSub<Right> for T where T: Sub<Right, Output = T> + SubAssign<Right> {}
 
-impl<T, Right> ClosedMul<Right> for T where T: Mul<Right, Output=T> + MulAssign<Right> {}
+impl<T, Right> ClosedMul<Right> for T where T: Mul<Right, Output = T> + MulAssign<Right> {}
 
-impl<T, Right> ClosedDiv<Right> for T where T: Div<Right, Output=T> + DivAssign<Right> {}
+impl<T, Right> ClosedDiv<Right> for T where T: Div<Right, Output = T> + DivAssign<Right> {}
 
-impl<T> ClosedNeg for T where T: Neg<Output=T> {}
+impl<T> ClosedNeg for T where T: Neg<Output = T> {}
 
 impl<T, Right> ClosedAddAssign<Right> for T where T: ClosedAdd<Right> + AddAssign<Right> {}
 

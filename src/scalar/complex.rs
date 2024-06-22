@@ -468,11 +468,7 @@ macro_rules! impl_complex (
     )*)
 );
 
-#[cfg(all(
-    not(feature = "std"),
-    not(feature = "libm_force"),
-    feature = "libm"
-))]
+#[cfg(all(not(feature = "std"), not(feature = "libm_force"), feature = "libm"))]
 impl_complex!(
     f32, f32, Float;
     f64, f64, Float
@@ -1441,7 +1437,7 @@ impl<N: RealField + PartialOrd> ComplexField for num_complex::Complex<N> {
         let two = one.clone() + one.clone();
         two.clone()
             * (((self.clone() + one.clone()) / two.clone()).sqrt() + ((self - one) / two).sqrt())
-            .ln()
+                .ln()
     }
 
     /// Computes the principal value of inverse hyperbolic tangent of `self`.

@@ -19,8 +19,10 @@ use std::{
         RemAssign, Sub, SubAssign,
     },
     simd::{
-        self as portable_simd, num::SimdFloat, num::SimdInt, cmp::SimdOrd, cmp::SimdPartialEq,
-        cmp::SimdPartialOrd as PortableSimdPartialOrd, num::SimdUint, StdFloat, },
+        self as portable_simd, cmp::SimdOrd, cmp::SimdPartialEq,
+        cmp::SimdPartialOrd as PortableSimdPartialOrd, num::SimdFloat, num::SimdInt, num::SimdUint,
+        StdFloat,
+    },
 };
 
 // This is a hack to allow use to reuse `_0` as integers or as identifier,

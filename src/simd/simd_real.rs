@@ -7,7 +7,7 @@ use crate::simd::{SimdComplexField, SimdPartialOrd, SimdSigned};
 /// This is implemented by scalar reals like `f32` and `f64` as well as SIMD reals like `portable_simd::f32x4`.
 #[allow(missing_docs)]
 pub trait SimdRealField:
-SimdPartialOrd + SimdSigned + SimdComplexField<SimdRealField=Self>
+    SimdPartialOrd + SimdSigned + SimdComplexField<SimdRealField = Self>
 {
     /// Copies the sign of `sign` to `self`.
     ///
