@@ -3,11 +3,11 @@ use crate::simd::*;
 // Given two token streams in the format `ignore_snd!([first_token_tree], [second])` will simply
 // expand to the first one. This is usefull in order to allow the repetition of some statement
 // according to some repetition variable, without using the repetition variables.
-macro_rules! ignore_snd(
+macro_rules! ignore_snd (
     ([$($fst: tt)*], [$($snd: tt)*]) => ($($fst)*)
 );
 
-macro_rules! impl_rand_auto_simd(
+macro_rules! impl_rand_auto_simd (
     ($($t: ty, $($i: ident),*;)*) => ($(
         impl rand::distributions::Distribution<AutoSimd<$t>> for rand::distributions::Standard {
             #[inline(always)]
@@ -86,7 +86,7 @@ impl_rand_auto_simd!(
 );
 
 #[cfg(feature = "wide")]
-macro_rules! impl_rand_wide_simd(
+macro_rules! impl_rand_wide_simd (
     ($($t: ident, $wrapped: ty, $arr: ty;)*) => ($(
         impl rand::distributions::Distribution<$t> for rand::distributions::Standard {
             #[inline(always)]
@@ -104,105 +104,8 @@ impl_rand_wide_simd!(
     WideF32x8, wide::f32x8, [f32; 8];
 );
 
-#[cfg(feature = "packed_simd")]
-macro_rules! impl_rand_packed_simd(
-    ($($wrapped: ty, $($i: ident),*;)*) => ($(
-        impl rand::distributions::Distribution<Simd<$wrapped>> for rand::distributions::Standard {
-            #[inline(always)]
-            fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Simd<$wrapped> {
-                Simd(<$wrapped>::new($(
-                    ignore_snd!([self.sample(rng)], [$i])
-                ),*))
-            }
-        }
-    )*)
-);
-
-#[cfg(feature = "packed_simd")]
-impl_rand_packed_simd!(
-    packed_simd::f32x2, _0, _1;
-    packed_simd::f32x4, _0, _1, _2, _3;
-    packed_simd::f32x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::f32x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::f64x2, _0, _1;
-    packed_simd::f64x4, _0, _1, _2, _3;
-    packed_simd::f64x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::i128x1, _0;
-    packed_simd::i128x2, _0, _1;
-    packed_simd::i128x4, _0, _1, _2, _3;
-    packed_simd::i16x2, _0, _1;
-    packed_simd::i16x4, _0, _1, _2, _3;
-    packed_simd::i16x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::i16x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::i16x32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    packed_simd::i32x2, _0, _1;
-    packed_simd::i32x4, _0, _1, _2, _3;
-    packed_simd::i32x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::i32x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::i64x2, _0, _1;
-    packed_simd::i64x4, _0, _1, _2, _3;
-    packed_simd::i64x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::i8x2, _0, _1;
-    packed_simd::i8x4, _0, _1, _2, _3;
-    packed_simd::i8x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::i8x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::i8x32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    packed_simd::i8x64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    packed_simd::isizex2, _0, _1;
-    packed_simd::isizex4, _0, _1, _2, _3;
-    packed_simd::isizex8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::u128x1, _0;
-    packed_simd::u128x2, _0, _1;
-    packed_simd::u128x4, _0, _1, _2, _3;
-    packed_simd::u16x2, _0, _1;
-    packed_simd::u16x4, _0, _1, _2, _3;
-    packed_simd::u16x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::u16x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::u16x32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    packed_simd::u32x2, _0, _1;
-    packed_simd::u32x4, _0, _1, _2, _3;
-    packed_simd::u32x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::u32x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::u64x2, _0, _1;
-    packed_simd::u64x4, _0, _1, _2, _3;
-    packed_simd::u64x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::u8x2, _0, _1;
-    packed_simd::u8x4, _0, _1, _2, _3;
-    packed_simd::u8x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::u8x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::u8x32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    packed_simd::u8x64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    packed_simd::usizex2, _0, _1;
-    packed_simd::usizex4, _0, _1, _2, _3;
-    packed_simd::usizex8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::m128x1, _0;
-    packed_simd::m128x2, _0, _1;
-    packed_simd::m128x4, _0, _1, _2, _3;
-    packed_simd::m16x2, _0, _1;
-    packed_simd::m16x4, _0, _1, _2, _3;
-    packed_simd::m16x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::m16x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::m16x32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    packed_simd::m32x2, _0, _1;
-    packed_simd::m32x4, _0, _1, _2, _3;
-    packed_simd::m32x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::m32x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::m64x2, _0, _1;
-    packed_simd::m64x4, _0, _1, _2, _3;
-    packed_simd::m64x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::m8x2, _0, _1;
-    packed_simd::m8x4, _0, _1, _2, _3;
-    packed_simd::m8x8, _0, _1, _2, _3, _4, _5, _6, _7;
-    packed_simd::m8x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
-    packed_simd::m8x32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
-    packed_simd::m8x64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    packed_simd::msizex2, _0, _1;
-    packed_simd::msizex4, _0, _1, _2, _3;
-    packed_simd::msizex8, _0, _1, _2, _3, _4, _5, _6, _7;
-);
-
 #[cfg(feature = "portable_simd")]
-macro_rules! impl_rand_portable_simd(
+macro_rules! impl_rand_portable_simd (
     ($($wrapped: ty, $($i: ident),*;)*) => ($(
         impl rand::distributions::Distribution<$wrapped> for rand::distributions::Standard {
             #[inline(always)]

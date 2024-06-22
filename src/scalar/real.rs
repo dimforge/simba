@@ -13,11 +13,11 @@ use num::Float;
 /// Trait shared by all reals.
 #[allow(missing_docs)]
 pub trait RealField:
-    ComplexField<RealField = Self>
-    + RelativeEq<Epsilon = Self>
-    + UlpsEq<Epsilon = Self>
-    + Signed
-    + PartialOrd
+ComplexField<RealField=Self>
++ RelativeEq<Epsilon=Self>
++ UlpsEq<Epsilon=Self>
++ Signed
++ PartialOrd
 {
     /// Is the sign of this real number positive?
     fn is_sign_positive(&self) -> bool;
@@ -57,7 +57,7 @@ pub trait RealField:
     fn ln_10() -> Self;
 }
 
-macro_rules! impl_real(
+macro_rules! impl_real (
     ($($T:ty, $M:ident, $cpysgn_mod: ident, $atan_mod: ident);*) => ($(
         impl RealField for $T {
             #[inline]
@@ -209,8 +209,6 @@ macro_rules! impl_real(
 );
 
 #[cfg(all(
-    not(target_arch = "nvptx"),
-    not(target_arch = "nvptx64"),
     not(feature = "std"),
     not(feature = "libm_force"),
     feature = "libm"

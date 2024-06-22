@@ -656,7 +656,7 @@ macro_rules! impl_float_simd (
 
         // FIXME: this should be part of impl_int_simd
         // but those methods do not seem to be implemented
-        // by packed_simd for integers.
+        // by portable_simd for integers.
         impl SimdSigned for Simd<$t> {
             #[inline(always)]
             fn simd_abs(&self) -> Self {
@@ -1600,10 +1600,10 @@ impl_bool_simd!(
 //);
 //
 //impl_simd_complex_from!(
-//    packed_simd::f32x2, f32, 0, 1;
-//    packed_simd::f32x4, f32, 0, 1, 2, 3;
-//    packed_simd::f32x8, f32, 0, 1, 2, 3, 4, 5, 6, 7;
-//    packed_simd::f32x16, f32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15;
+//    portable_simd::f32x2, f32, 0, 1;
+//    portable_simd::f32x4, f32, 0, 1, 2, 3;
+//    portable_simd::f32x8, f32, 0, 1, 2, 3, 4, 5, 6, 7;
+//    portable_simd::f32x16, f32, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15;
 //);
 
 //////////////////////////////////////////

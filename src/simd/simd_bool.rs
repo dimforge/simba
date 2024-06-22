@@ -3,15 +3,15 @@ use std::ops::{BitAnd, BitOr, BitXor, Not};
 
 /// Lane-wise generalization of `bool` for SIMD booleans.
 ///
-/// This trait implemented by `bool` as well as SIMD boolean types like `packed_simd::m32x4`.
+/// This trait implemented by `bool` as well as SIMD boolean types like `portable_simd::mask32x4`.
 /// It is designed to abstract the behavior of booleans so it can work with multi-lane boolean
 /// values in an AoSoA setting.
 pub trait SimdBool:
-    Copy
-    + BitAnd<Self, Output = Self>
-    + BitOr<Self, Output = Self>
-    + BitXor<Self, Output = Self>
-    + Not<Output = Self>
+Copy
++ BitAnd<Self, Output=Self>
++ BitOr<Self, Output=Self>
++ BitXor<Self, Output=Self>
++ Not<Output=Self>
 {
     /// A bit mask representing the boolean state of each lanes of `self`.
     ///
@@ -36,7 +36,7 @@ pub trait SimdBool:
     ///
     /// The implementor of this trait is free to choose on what cases `if_value` and `else_value` are actually
     /// called.
-    fn if_else<Res: SimdValue<SimdBool = Self>>(
+    fn if_else<Res: SimdValue<SimdBool=Self>>(
         self,
         if_value: impl FnOnce() -> Res,
         else_value: impl FnOnce() -> Res,
@@ -49,7 +49,7 @@ pub trait SimdBool:
     /// - For each lane of `self` containing `0` but with a corresponding lane of `else_if.0()` containing `0`, the result will contain the corresponding lane of `else_value()`.
     ///
     /// The implementor of this trait is free to choose on what cases any of those closures are implemented.
-    fn if_else2<Res: SimdValue<SimdBool = Self>>(
+    fn if_else2<Res: SimdValue<SimdBool=Self>>(
         self,
         if_value: impl FnOnce() -> Res,
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
@@ -64,7 +64,7 @@ pub trait SimdBool:
     /// - Other lanes will contain the corresponding lane of `else_value()`.
     ///
     /// The implementor of this trait is free to choose on what cases any of those closures are implemented.
-    fn if_else3<Res: SimdValue<SimdBool = Self>>(
+    fn if_else3<Res: SimdValue<SimdBool=Self>>(
         self,
         if_value: impl FnOnce() -> Res,
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
@@ -110,7 +110,7 @@ impl SimdBool for bool {
     }
 
     #[inline(always)]
-    fn if_else<Res: SimdValue<SimdBool = Self>>(
+    fn if_else<Res: SimdValue<SimdBool=Self>>(
         self,
         if_value: impl FnOnce() -> Res,
         else_value: impl FnOnce() -> Res,
@@ -123,7 +123,7 @@ impl SimdBool for bool {
     }
 
     #[inline(always)]
-    fn if_else2<Res: SimdValue<SimdBool = Self>>(
+    fn if_else2<Res: SimdValue<SimdBool=Self>>(
         self,
         if_value: impl FnOnce() -> Res,
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
@@ -139,7 +139,7 @@ impl SimdBool for bool {
     }
 
     #[inline(always)]
-    fn if_else3<Res: SimdValue<SimdBool = Self>>(
+    fn if_else3<Res: SimdValue<SimdBool=Self>>(
         self,
         if_value: impl FnOnce() -> Res,
         else_if: (impl FnOnce() -> Self, impl FnOnce() -> Res),
