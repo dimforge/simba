@@ -19,15 +19,14 @@ use std::{
         RemAssign, Sub, SubAssign,
     },
     simd::{
-        self as portable_simd, SimdFloat, SimdInt, SimdOrd, SimdPartialEq,
-        SimdPartialOrd as PortableSimdPartialOrd, SimdUint, StdFloat, ToBitMask,
-    },
+        self as portable_simd, num::SimdFloat, num::SimdInt, cmp::SimdOrd, cmp::SimdPartialEq,
+        cmp::SimdPartialOrd as PortableSimdPartialOrd, num::SimdUint, StdFloat, },
 };
 
 // This is a hack to allow use to reuse `_0` as integers or as identifier,
 // depending on whether or not `ident_to_value` has been called in scope.
 // This helps writing macros that define both `::new` and `From([T; lanes()])`.
-macro_rules! ident_to_value(
+macro_rules! ident_to_value (
     () => {
         const _0: usize = 0; const _1: usize = 1; const _2: usize = 2; const _3: usize = 3; const _4: usize = 4; const _5: usize = 5; const _6: usize = 6; const _7: usize = 7;
         const _8: usize = 8; const _9: usize = 9; const _10: usize = 10; const _11: usize = 11; const _12: usize = 12; const _13: usize = 13; const _14: usize = 14; const _15: usize = 15;
@@ -47,7 +46,7 @@ macro_rules! ident_to_value(
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Simd<N>(pub N);
 
-macro_rules! impl_bool_simd(
+macro_rules! impl_bool_simd (
     ($($t: ty, $lanes: literal, $($i: ident),*;)*) => {$(
         impl fmt::Display for Simd<$t> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -243,7 +242,7 @@ macro_rules! impl_bool_simd(
     )*}
 );
 
-macro_rules! impl_scalar_subset_of_simd(
+macro_rules! impl_scalar_subset_of_simd (
     ($($t: ty),*) => {$(
         impl<N2> SubsetOf<Simd<N2>> for $t
             where Simd<N2>: SimdValue + Copy,
@@ -272,7 +271,7 @@ impl_scalar_subset_of_simd!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, 
 #[cfg(feature = "decimal")]
 impl_scalar_subset_of_simd!(d128);
 
-macro_rules! impl_simd_value(
+macro_rules! impl_simd_value (
     ($($t: ty, $elt: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl fmt::Display for Simd<$t> {
             fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -305,7 +304,7 @@ macro_rules! impl_simd_value(
 
             #[inline(always)]
             fn lanes() -> usize {
-                <$t>::LANES
+                <$t>::LEN
             }
 
             #[inline(always)]
@@ -341,7 +340,7 @@ macro_rules! impl_simd_value(
     )*)
 );
 
-macro_rules! impl_uint_simd(
+macro_rules! impl_uint_simd (
     ($($t: ty, $elt: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_simd_value!($t, $elt, $bool $(, $i)*;);
 
@@ -357,16 +356,16 @@ macro_rules! impl_uint_simd(
             }
         }
 
-        impl From<[$elt; <$t>::LANES]> for Simd<$t> {
+        impl From<[$elt; <$t>::LEN]> for Simd<$t> {
             #[inline(always)]
-            fn from(vals: [$elt; <$t>::LANES]) -> Self {
+            fn from(vals: [$elt; <$t>::LEN]) -> Self {
                 Simd(<$t>::from(vals))
             }
         }
 
-        impl From<Simd<$t>> for [$elt; <$t>::LANES] {
+        impl From<Simd<$t>> for [$elt; <$t>::LEN] {
             #[inline(always)]
-            fn from(val: Simd<$t>) -> [$elt; <$t>::LANES] {
+            fn from(val: Simd<$t>) -> [$elt; <$t>::LEN] {
                 val.0.to_array()
             }
         }
@@ -636,7 +635,7 @@ macro_rules! impl_uint_simd(
     )*)
 );
 
-macro_rules! impl_int_simd(
+macro_rules! impl_int_simd (
     ($($t: ty, $elt: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_uint_simd!($t, $elt, $bool $(, $i)*;);
 
@@ -651,7 +650,7 @@ macro_rules! impl_int_simd(
     )*)
 );
 
-macro_rules! impl_float_simd(
+macro_rules! impl_float_simd (
     ($($t: ty, $elt: ident, $int: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_int_simd!($t, $elt, $bool $(, $i)*;);
 
@@ -936,12 +935,12 @@ macro_rules! impl_float_simd(
 
             #[inline(always)]
             fn simd_exp(self) -> Self {
-                self.map_lanes(|e| e.exp())
+                Self(self.0.exp())
             }
 
             #[inline(always)]
             fn simd_exp2(self) -> Self {
-                self.map_lanes(|e| e.exp2())
+                Self(self.0.exp2())
             }
 
             #[inline(always)]
@@ -956,7 +955,7 @@ macro_rules! impl_float_simd(
 
             #[inline(always)]
             fn simd_ln(self) -> Self {
-                self.map_lanes(|e| e.ln())
+                Self(self.0.ln())
             }
 
             #[inline(always)]
@@ -966,12 +965,12 @@ macro_rules! impl_float_simd(
 
             #[inline(always)]
             fn simd_log2(self) -> Self {
-                self.map_lanes(|e| e.log2())
+                Self(self.0.log2())
             }
 
             #[inline(always)]
             fn simd_log10(self) -> Self {
-                self.map_lanes(|e| e.log10())
+                Self(self.0.log10())
             }
 
             #[inline(always)]
@@ -986,12 +985,12 @@ macro_rules! impl_float_simd(
 
             #[inline(always)]
             fn simd_sin(self) -> Self {
-                self.map_lanes(|e| e.sin())
+                Self(self.0.sin())
             }
 
             #[inline(always)]
             fn simd_cos(self) -> Self {
-                self.map_lanes(|e| e.cos())
+                Self(self.0.cos())
             }
 
             #[inline(always)]

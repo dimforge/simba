@@ -13,21 +13,21 @@ jobs:
   check-fmt:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Check formatting
-      run: cargo fmt -- --check
+      - uses: actions/checkout@v2
+      - name: Check formatting
+        run: cargo fmt -- --check
   build-native:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Build --no-default-feature
-      run: cargo build --no-default-features;
-    - name: Build libm only
-      run: cargo build --no-default-features --features libm;
-    - name: Build (default features)
-      run: cargo build;
-    - name: Build all features except cuda,libm
-      run: cargo build --features wide,rkyv-serialize,serde_serialize,partial_fixed_point_support;
+      - uses: actions/checkout@v2
+      - name: Build --no-default-feature
+        run: cargo build --no-default-features;
+      - name: Build libm only
+        run: cargo build --no-default-features --features libm;
+      - name: Build (default features)
+        run: cargo build;
+      - name: Build all features except libm
+        run: cargo build --features wide,rkyv-serialize,serde_serialize,partial_fixed_point_support;
   build-wasm:
     runs-on: ubuntu-latest
     steps:
@@ -50,18 +50,3 @@ jobs:
         run: xargo build --verbose --no-default-features --target=x86_64-unknown-linux-gnu;
       - name: build x86_64-unknown-linux-gnu --features libm
         run: xargo build --verbose --no-default-features --features libm --target=x86_64-unknown-linux-gnu;
-  build-cuda:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: Jimver/cuda-toolkit@v0.2.8
-      - name: Install nightly-2021-12-04
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2021-12-04
-          override: true
-      - uses: actions/checkout@v2
-      - run: rustup target add nvptx64-nvidia-cuda
-      - run: cargo build --no-default-features --features cuda
-      - run: cargo build --no-default-features --features cuda --target=nvptx64-nvidia-cuda
-        env:
-          CUDA_ARCH: "350"
