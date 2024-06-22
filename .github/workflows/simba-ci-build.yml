@@ -28,6 +28,8 @@ jobs:
         run: cargo build;
       - name: Build all features except libm
         run: cargo build --features wide,rkyv-serialize,serde_serialize,partial_fixed_point_support;
+      - name: Build all features
+        run: cargo +nightly build --all-features
   build-wasm:
     runs-on: ubuntu-latest
     steps:
