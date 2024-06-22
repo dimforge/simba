@@ -656,7 +656,7 @@ macro_rules! impl_float_simd (
     ($($t: ty, $elt: ident, $int: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_int_simd!($t, $elt, $bool $(, $i)*;);
 
-        // FIXME: this should be part of impl_int_simd
+        // TODO: this should be part of impl_int_simd
         // but those methods do not seem to be implemented
         // by portable_simd for integers.
         impl SimdSigned for Simd<$t> {
@@ -1076,7 +1076,7 @@ macro_rules! impl_float_simd (
             fn simd_horizontal_product(self) -> Self::Element {
                 let mut prod = self.extract(0);
                 for ii in 1..Self::lanes() {
-                    prod = prod * self.extract(ii)
+                    prod *= self.extract(ii)
                 }
                 prod
             }
@@ -1207,7 +1207,7 @@ macro_rules! impl_float_simd (
 
             #[inline]
             fn simd_powi(self, n: i32) -> Self {
-                // FIXME: is there a more accurate solution?
+                // TODO: is there a more accurate solution?
                 let n = Simd::<$t>::from_subset(&(n as f64));
                 self.simd_powf(n)
             }

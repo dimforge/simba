@@ -10,16 +10,35 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check-fmt:
+  fmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Check formatting
         run: cargo fmt -- --check
+  clippy:
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: clippy
+      - name: Check formatting
+        run: cargo clippy --all-features
   build-native:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: false
       - name: Build --no-default-feature
         run: cargo build --no-default-features;
       - name: Build libm only

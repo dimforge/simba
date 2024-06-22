@@ -23,7 +23,7 @@ use std::{
 // This is a hack to allow use to reuse `_0` as integers or as identifier,
 // depending on whether or not `ident_to_value` has been called in scope.
 // This helps writing macros that define both `::new` and `From([T; lanes()])`.
-macro_rules! ident_to_value(
+macro_rules! ident_to_value (
     () => {
         const _0: usize = 0; const _1: usize = 1; const _2: usize = 2; const _3: usize = 3; const _4: usize = 4; const _5: usize = 5; const _6: usize = 6; const _7: usize = 7;
         const _8: usize = 8; const _9: usize = 9; const _10: usize = 10; const _11: usize = 11; const _12: usize = 12; const _13: usize = 13; const _14: usize = 14; const _15: usize = 15;
@@ -60,7 +60,7 @@ pub struct AutoSimd<N>(pub N);
 )]
 pub struct AutoBoolSimd<N>(pub N);
 
-macro_rules! impl_bool_simd(
+macro_rules! impl_bool_simd (
     ($($t: ty, $lanes: expr, $($i: ident),*;)*) => {$(
         impl_simd_value!($t, bool, $lanes, AutoSimd<$t> $(, $i)*;);
 
@@ -200,7 +200,7 @@ macro_rules! impl_bool_simd(
     )*}
 );
 
-macro_rules! impl_scalar_subset_of_simd(
+macro_rules! impl_scalar_subset_of_simd (
     ($($t: ty),*) => {$(
         impl<N2> SubsetOf<AutoSimd<N2>> for $t
             where AutoSimd<N2>: SimdValue + Copy,
@@ -229,7 +229,7 @@ impl_scalar_subset_of_simd!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, 
 #[cfg(feature = "decimal")]
 impl_scalar_subset_of_simd!(d128);
 
-macro_rules! impl_simd_value(
+macro_rules! impl_simd_value (
     ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $($i: ident),*;)*) => ($(
         impl ArrTransform for AutoSimd<$t> {
             #[inline(always)]
@@ -332,7 +332,7 @@ macro_rules! impl_simd_value(
     )*)
 );
 
-macro_rules! impl_uint_simd(
+macro_rules! impl_uint_simd (
     ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $($i: ident),*;)*) => ($(
         impl_simd_value!($t, $elt, $lanes, $bool $(, $i)*;);
 
@@ -617,7 +617,7 @@ macro_rules! impl_uint_simd(
     )*)
 );
 
-macro_rules! impl_int_simd(
+macro_rules! impl_int_simd (
     ($($t: ty, $elt: ty, $lanes: expr, $bool: ty, $($i: ident),*;)*) => ($(
         impl_uint_simd!($t, $elt, $lanes, $bool $(, $i)*;);
 
@@ -632,13 +632,11 @@ macro_rules! impl_int_simd(
     )*)
 );
 
-macro_rules! impl_float_simd(
+macro_rules! impl_float_simd (
     ($($t: ty, $elt: ty, $lanes: expr, $int: ty, $bool: ty, $($i: ident),*;)*) => ($(
         impl_int_simd!($t, $elt, $lanes, $bool $(, $i)*;);
 
-        // FIXME: this should be part of impl_int_simd
-        // but those methods do not seem to be implemented
-        // by packed_simd for integers.
+        // TODO: this should be part of impl_int_simd
         impl SimdSigned for AutoSimd<$t> {
             #[inline(always)]
             fn simd_abs(&self) -> Self {
@@ -1041,7 +1039,7 @@ macro_rules! impl_float_simd(
             fn simd_horizontal_product(self) -> Self::Element {
                 let mut prod = self.extract(0);
                 for ii in 1..$lanes {
-                    prod = prod * self.extract(ii)
+                    prod *= self.extract(ii)
                 }
                 prod
             }
@@ -1172,7 +1170,7 @@ macro_rules! impl_float_simd(
 
             #[inline]
             fn simd_powi(self, n: i32) -> Self {
-                // FIXME: is there a more accurate solution?
+                // TODO: is there a more accurate solution?
                 let n = AutoSimd::<$t>::from_subset(&(n as f64));
                 self.simd_powf(n)
             }

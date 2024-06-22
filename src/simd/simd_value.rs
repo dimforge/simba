@@ -16,12 +16,18 @@ pub trait SimdValue: Sized {
     /// Panics if `i >= Self::lanes()`.
     fn extract(&self, i: usize) -> Self::Element;
     /// Extracts the i-th lane of `self` without bound-checking.
+    ///
+    /// # Safety
+    /// Undefined behavior if `i >= Self::lanes()`.
     unsafe fn extract_unchecked(&self, i: usize) -> Self::Element;
     /// Replaces the i-th lane of `self` by `val`.
     ///
     /// Panics if `i >= Self::lanes()`.
     fn replace(&mut self, i: usize, val: Self::Element);
     /// Replaces the i-th lane of `self` by `val` without bound-checking.
+    ///
+    /// # Safety
+    /// Undefined behavior if `i >= Self::lanes()`.
     unsafe fn replace_unchecked(&mut self, i: usize, val: Self::Element);
 
     /// Merges `self` and `other` depending on the lanes of `cond`.
@@ -141,7 +147,7 @@ impl<N: SimdValue> SimdValue for num_complex::Complex<N> {
 
 impl<N: PrimitiveSimdValue> PrimitiveSimdValue for num_complex::Complex<N> {}
 
-macro_rules! impl_primitive_simd_value_for_scalar(
+macro_rules! impl_primitive_simd_value_for_scalar (
     ($($t: ty),*) => {$(
         impl PrimitiveSimdValue for $t {}
         impl SimdValue for $t {

@@ -156,7 +156,7 @@ macro_rules! complex_trait_methods (
 ///
 /// Complex numbers are equipped with functions that are commonly used on complex numbers and reals.
 /// The results of those functions only have to be approximately equal to the actual theoretical values.
-// FIXME: SubsetOf should be removed when specialization will be supported by rustc. This will
+// TODO: SubsetOf should be removed when specialization will be supported by rustc. This will
 // allow a blanket impl: impl<T: Clone> SubsetOf<T> for T { ... }
 #[allow(missing_docs)]
 pub trait ComplexField:
@@ -305,7 +305,7 @@ macro_rules! impl_complex (
             #[cfg(not(feature = "std"))]
             #[inline]
             fn powi(self, n: i32) -> Self {
-                // FIXME: is there a more accurate solution?
+                // TODO: is there a more accurate solution?
                 $libm::powf(self, n as $T)
             }
 
@@ -1162,7 +1162,7 @@ impl<N: RealField + PartialOrd> ComplexField for num_complex::Complex<N> {
 
     #[inline]
     fn powi(self, n: i32) -> Self {
-        // FIXME: is there a more accurate solution?
+        // TODO: is there a more accurate solution?
         let n = N::from_subset(&(n as f64));
         self.powf(n)
     }
