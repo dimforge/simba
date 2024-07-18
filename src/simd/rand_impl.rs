@@ -1,7 +1,7 @@
 use crate::simd::*;
 
 // Given two token streams in the format `ignore_snd!([first_token_tree], [second])` will simply
-// expand to the first one. This is usefull in order to allow the repetition of some statement
+// expand to the first one. This is useful in order to allow the repetition of some statement
 // according to some repetition variable, without using the repetition variables.
 macro_rules! ignore_snd (
     ([$($fst: tt)*], [$($snd: tt)*]) => ($($fst)*)
