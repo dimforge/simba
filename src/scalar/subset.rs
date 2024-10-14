@@ -3,10 +3,11 @@ use decimal::d128;
 use num::Zero;
 use num_complex::Complex;
 
-/// Nested sets and conversions between them (using an injective mapping). Useful to work with
-/// substructures. In generic code, it is preferable to use `SupersetOf` as trait bound whenever
-/// possible instead of `SubsetOf` (because SupersetOf is automatically implemented whenever
-/// `SubsetOf` is).
+/// Nested sets and conversions between them (using an injective mapping).
+///
+/// Useful to work with substructures. In generic code, it is preferable to use `SupersetOf`
+/// as trait bound whenever possible instead of `SubsetOf` (because SupersetOf is automatically
+/// implemented whenever `SubsetOf` is).
 ///
 /// The notion of "nested sets" is very broad and applies to what the types are _supposed to
 /// represent_, independently from their actual implementation details and limitations. For
@@ -44,9 +45,11 @@ pub trait SubsetOf<T>: Sized {
     fn is_in_subset(element: &T) -> bool;
 }
 
-/// Nested sets and conversions between them. Useful to work with substructures. It is preferable
-/// to implement the `SubsetOf` trait instead of `SupersetOf` whenever possible (because
-/// `SupersetOf` is automatically implemented whenever `SubsetOf` is).
+/// Nested sets and conversions between them.
+///
+/// Useful to work with substructures. It is preferable to implement the `SubsetOf` trait instead
+/// of `SupersetOf` whenever possible (because `SupersetOf` is automatically implemented whenever
+/// `SubsetOf` is).
 ///
 /// The notion of "nested sets" is very broad and applies to what the types are _supposed to
 /// represent_, independently from their actual implementation details and limitations. For
