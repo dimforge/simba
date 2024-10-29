@@ -5,7 +5,7 @@ use num_complex::Complex;
 
 /// Nested sets and conversions between them (using an injective mapping). Useful to work with
 /// substructures. In generic code, it is preferable to use `SupersetOf` as trait bound whenever
-/// possible instead of `SubsetOf` (because SupersetOf is automatically implemented whenever
+/// possible instead of `SubsetOf` (because `SupersetOf` is automatically implemented whenever
 /// `SubsetOf` is).
 ///
 /// The notion of "nested sets" is very broad and applies to what the types are _supposed to
