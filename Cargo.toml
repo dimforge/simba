@@ -31,7 +31,6 @@ num-complex = { version = "0.4", default-features = false }
 wide = { version = "0.7", default-features = false, optional = true }
 fixed = { version = "1", optional = true }
 cordic = { version = "0.1", optional = true }
-paste = "1.0"
 rand = { version = "0.8", optional = true }
 serde = { version = "1", default-features = false, optional = true }
 rkyv = { version = "0.7", optional = true }

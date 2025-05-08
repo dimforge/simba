@@ -11,147 +11,6 @@ use num::Float;
 //#[cfg(feature = "decimal")]
 //use decimal::d128;
 
-macro_rules! complex_trait_methods (
-    ($RealField: ident $(, $prefix: ident)*) => {
-        paste::item! {
-            /// Builds a pure-real complex number from the given value.
-            fn [<from_ $($prefix)* real>](re: Self::$RealField) -> Self;
-
-            /// The real part of this complex number.
-            fn [<$($prefix)* real>](self) -> Self::$RealField;
-
-            /// The imaginary part of this complex number.
-            fn [<$($prefix)* imaginary>](self) -> Self::$RealField;
-
-            /// The modulus of this complex number.
-            fn [<$($prefix)* modulus>](self) -> Self::$RealField;
-
-            /// The squared modulus of this complex number.
-            fn [<$($prefix)* modulus_squared>](self) -> Self::$RealField;
-
-            /// The argument of this complex number.
-            fn [<$($prefix)* argument>](self) -> Self::$RealField;
-
-            /// The sum of the absolute value of this complex number's real and imaginary part.
-            fn [<$($prefix)* norm1>](self) -> Self::$RealField;
-
-            /// Multiplies this complex number by `factor`.
-            fn [<$($prefix)* scale>](self, factor: Self::$RealField) -> Self;
-
-            /// Divides this complex number by `factor`.
-            fn [<$($prefix)* unscale>](self, factor: Self::$RealField) -> Self;
-
-            /// The polar form of this complex number: (modulus, arg)
-            fn [<$($prefix)* to_polar>](self) -> (Self::$RealField, Self::$RealField) {
-                (self.clone().[<$($prefix)* modulus>](), self.[<$($prefix)* argument>]())
-            }
-
-            /// The exponential form of this complex number: (modulus, e^{i arg})
-            fn [<$($prefix)* to_exp>](self) -> (Self::$RealField, Self) {
-                let m = self.clone().[<$($prefix)* modulus>]();
-
-                if !m.is_zero() {
-                    (m.clone(), self.[<$($prefix)* unscale>](m))
-                } else {
-                    (Self::$RealField::zero(), Self::one())
-                }
-            }
-
-            /// The exponential part of this complex number: `self / self.modulus()`
-            fn [<$($prefix)* signum>](self) -> Self {
-                self.[<$($prefix)* to_exp>]().1
-            }
-
-            fn [<$($prefix)* floor>](self) -> Self;
-            fn [<$($prefix)* ceil>](self) -> Self;
-            fn [<$($prefix)* round>](self) -> Self;
-            fn [<$($prefix)* trunc>](self) -> Self;
-            fn [<$($prefix)* fract>](self) -> Self;
-            fn [<$($prefix)* mul_add>](self, a: Self, b: Self) -> Self;
-
-            /// The absolute value of this complex number: `self / self.signum()`.
-            ///
-            /// This is equivalent to `self.modulus()`.
-            fn [<$($prefix)* abs>](self) -> Self::$RealField;
-
-            /// Computes (self.conjugate() * self + other.conjugate() * other).sqrt()
-            fn [<$($prefix)* hypot>](self, other: Self) -> Self::$RealField;
-
-            fn [<$($prefix)* recip>](self) -> Self;
-            fn [<$($prefix)* conjugate>](self) -> Self;
-            fn [<$($prefix)* sin>](self) -> Self;
-            fn [<$($prefix)* cos>](self) -> Self;
-            fn [<$($prefix)* sin_cos>](self) -> (Self, Self);
-            #[inline]
-            fn [<$($prefix)* sinh_cosh>](self) -> (Self, Self) {
-                (self.clone().[<$($prefix)* sinh>](), self.[<$($prefix)* cosh>]())
-            }
-            fn [<$($prefix)* tan>](self) -> Self;
-            fn [<$($prefix)* asin>](self) -> Self;
-            fn [<$($prefix)* acos>](self) -> Self;
-            fn [<$($prefix)* atan>](self) -> Self;
-            fn [<$($prefix)* sinh>](self) -> Self;
-            fn [<$($prefix)* cosh>](self) -> Self;
-            fn [<$($prefix)* tanh>](self) -> Self;
-            fn [<$($prefix)* asinh>](self) -> Self;
-            fn [<$($prefix)* acosh>](self) -> Self;
-            fn [<$($prefix)* atanh>](self) -> Self;
-
-            /// Cardinal sine
-            #[inline]
-            fn [<$($prefix)* sinc>](self) -> Self {
-                if self.is_zero() {
-                    Self::one()
-                } else {
-                    self.clone().[<$($prefix)* sin>]() / self
-                }
-            }
-
-            #[inline]
-            fn [<$($prefix)* sinhc>](self) -> Self {
-                if self.is_zero() {
-                    Self::one()
-                } else {
-                    self.clone().[<$($prefix)* sinh>]() / self
-                }
-            }
-
-            /// Cardinal cos
-            #[inline]
-            fn [<$($prefix)* cosc>](self) -> Self {
-                if self.is_zero() {
-                    Self::one()
-                } else {
-                    self.clone().[<$($prefix)* cos>]() / self
-                }
-            }
-
-            #[inline]
-            fn [<$($prefix)* coshc>](self) -> Self {
-                if self.is_zero() {
-                    Self::one()
-                } else {
-                    self.clone().[<$($prefix)* cosh>]() / self
-                }
-            }
-
-            fn [<$($prefix)* log>](self, base: Self::$RealField) -> Self;
-            fn [<$($prefix)* log2>](self) -> Self;
-            fn [<$($prefix)* log10>](self) -> Self;
-            fn [<$($prefix)* ln>](self) -> Self;
-            fn [<$($prefix)* ln_1p>](self) -> Self;
-            fn [<$($prefix)* sqrt>](self) -> Self;
-            fn [<$($prefix)* exp>](self) -> Self;
-            fn [<$($prefix)* exp2>](self) -> Self;
-            fn [<$($prefix)* exp_m1>](self) -> Self;
-            fn [<$($prefix)* powi>](self, n: i32) -> Self;
-            fn [<$($prefix)* powf>](self, n: Self::$RealField) -> Self;
-            fn [<$($prefix)* powc>](self, n: Self) -> Self;
-            fn [<$($prefix)* cbrt>](self) -> Self;
-        }
-    }
-);
-
 /// Trait shared by all complex fields and its subfields (like real numbers).
 ///
 /// Complex numbers are equipped with functions that are commonly used on complex numbers and reals.
@@ -176,9 +35,140 @@ SubsetOf<Self>
 + Debug
 + Display
 {
-    type RealField: RealField;
-    complex_trait_methods!(RealField);
+    type RealField: RealField;/// Builds a pure-real complex number from the given value.
+    fn from_real(re: Self::RealField) -> Self;
 
+    /// The real part of this complex number.
+    fn real(self) -> Self::RealField;
+
+    /// The imaginary part of this complex number.
+    fn imaginary(self) -> Self::RealField;
+
+    /// The modulus of this complex number.
+    fn modulus(self) -> Self::RealField;
+
+    /// The squared modulus of this complex number.
+    fn modulus_squared(self) -> Self::RealField;
+
+    /// The argument of this complex number.
+    fn argument(self) -> Self::RealField;
+
+    /// The sum of the absolute value of this complex number's real and imaginary part.
+    fn norm1(self) -> Self::RealField;
+
+    /// Multiplies this complex number by `factor`.
+    fn scale(self, factor: Self::RealField) -> Self;
+
+    /// Divides this complex number by `factor`.
+    fn unscale(self, factor: Self::RealField) -> Self;
+
+    /// The polar form of this complex number: (modulus, arg)
+    fn to_polar(self) -> (Self::RealField, Self::RealField) {
+        (self.clone().modulus(), self.argument())
+    }
+
+    /// The exponential form of this complex number: (modulus, e^{i arg})
+    fn to_exp(self) -> (Self::RealField, Self) {
+        let m = self.clone().modulus();
+
+        if !m.is_zero() {
+            (m.clone(), self.unscale(m))
+        } else {
+            (Self::RealField::zero(), Self::one())
+        }
+    }
+
+    /// The exponential part of this complex number: `self / self.modulus()`
+    fn signum(self) -> Self {
+        self.to_exp().1
+    }
+
+    fn floor(self) -> Self;
+    fn ceil(self) -> Self;
+    fn round(self) -> Self;
+    fn trunc(self) -> Self;
+    fn fract(self) -> Self;
+    fn mul_add(self, a: Self, b: Self) -> Self;
+
+    /// The absolute value of this complex number: `self / self.signum()`.
+    ///
+    /// This is equivalent to `self.modulus()`.
+    fn abs(self) -> Self::RealField;
+
+    /// Computes (self.conjugate() * self + other.conjugate() * other).sqrt()
+    fn hypot(self, other: Self) -> Self::RealField;
+
+    fn recip(self) -> Self;
+    fn conjugate(self) -> Self;
+    fn sin(self) -> Self;
+    fn cos(self) -> Self;
+    fn sin_cos(self) -> (Self, Self);
+    #[inline]
+    fn sinh_cosh(self) -> (Self, Self) {
+        (self.clone().sinh(), self.cosh())
+    }
+    fn tan(self) -> Self;
+    fn asin(self) -> Self;
+    fn acos(self) -> Self;
+    fn atan(self) -> Self;
+    fn sinh(self) -> Self;
+    fn cosh(self) -> Self;
+    fn tanh(self) -> Self;
+    fn asinh(self) -> Self;
+    fn acosh(self) -> Self;
+    fn atanh(self) -> Self;
+
+    /// Cardinal sine
+    #[inline]
+    fn sinc(self) -> Self {
+        if self.is_zero() {
+            Self::one()
+        } else {
+            self.clone().sin() / self
+        }
+    }
+
+    #[inline]
+    fn sinhc(self) -> Self {
+        if self.is_zero() {
+            Self::one()
+        } else {
+            self.clone().sinh() / self
+        }
+    }
+
+    /// Cardinal cos
+    #[inline]
+    fn cosc(self) -> Self {
+        if self.is_zero() {
+            Self::one()
+        } else {
+            self.clone().cos() / self
+        }
+    }
+
+    #[inline]
+    fn coshc(self) -> Self {
+        if self.is_zero() {
+            Self::one()
+        } else {
+            self.clone().cosh() / self
+        }
+    }
+
+    fn log(self, base: Self::RealField) -> Self;
+    fn log2(self) -> Self;
+    fn log10(self) -> Self;
+    fn ln(self) -> Self;
+    fn ln_1p(self) -> Self;
+    fn sqrt(self) -> Self;
+    fn exp(self) -> Self;
+    fn exp2(self) -> Self;
+    fn exp_m1(self) -> Self;
+    fn powi(self, n: i32) -> Self;
+    fn powf(self, n: Self::RealField) -> Self;
+    fn powc(self, n: Self) -> Self;
+    fn cbrt(self) -> Self;
     fn is_finite(&self) -> bool;
     fn try_sqrt(self) -> Option<Self>;
 }
