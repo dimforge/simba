@@ -319,17 +319,17 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn all(self) -> bool {
-                self == Self(!wide::$f32xX::ZERO)
+                self.0.all()
             }
 
             #[inline(always)]
             fn any(self) -> bool {
-                self != Self(wide::$f32xX::ZERO)
+                self.0.any()
             }
 
             #[inline(always)]
             fn none(self) -> bool {
-                self == Self(wide::$f32xX::ZERO)
+                self.0.none()
             }
 
             #[inline(always)]
@@ -1549,4 +1549,30 @@ impl_wide_f32!(f32, f32x8, WideF32x8, WideBoolF32x8, 8; 1, 2, 3, 4, 5, 6, 7);
 #[inline]
 fn simd_complex_from_polar<N: SimdRealField>(r: N, theta: N) -> num_complex::Complex<N> {
     num_complex::Complex::new(r.clone() * theta.clone().simd_cos(), r * theta.simd_sin())
+}
+
+#[cfg(test)]
+mod test {
+    use crate::simd::{SimdBool, SimdValue, WideBoolF32x4, WideBoolF32x8, WideBoolF64x4};
+
+    #[test]
+    fn simd_bool_all_true_f32x4() {
+        assert!(WideBoolF32x4::splat(true).all());
+        assert!(!WideBoolF32x4::splat(false).all());
+        assert!(WideBoolF32x4::splat(false).none());
+    }
+
+    #[test]
+    fn simd_bool_all_true_f32x8() {
+        assert!(WideBoolF32x8::splat(true).all());
+        assert!(!WideBoolF32x8::splat(false).all());
+        assert!(WideBoolF32x8::splat(false).none());
+    }
+
+    #[test]
+    fn simd_bool_all_true_f64x4() {
+        assert!(WideBoolF64x4::splat(true).all());
+        assert!(!WideBoolF64x4::splat(false).all());
+        assert!(WideBoolF32x8::splat(false).none());
+    }
 }
