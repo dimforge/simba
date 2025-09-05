@@ -68,6 +68,7 @@ macro_rules! impl_bool_simd (
             pub const ZERO: Self = AutoSimd([false; $lanes]);
             pub const ONE: Self = AutoSimd([true; $lanes]);
 
+            #[inline(always)]
             pub fn new($($i: bool),*) -> Self {
                 AutoSimd([$($i),*])
             }
@@ -83,7 +84,7 @@ macro_rules! impl_bool_simd (
         impl Not for AutoSimd<$t> {
             type Output = Self;
 
-            #[inline]
+            #[inline(always)]
             fn not(self) -> Self {
                 self.map(|x| !x)
             }
@@ -91,6 +92,8 @@ macro_rules! impl_bool_simd (
 
         impl BitAnd<AutoSimd<$t>> for AutoSimd<$t> {
             type Output = Self;
+
+            #[inline(always)]
             fn bitand(self, rhs: Self) -> Self {
                 self.zip_map(rhs, |x, y| x & y)
             }
@@ -98,6 +101,8 @@ macro_rules! impl_bool_simd (
 
         impl BitOr<AutoSimd<$t>> for AutoSimd<$t> {
             type Output = Self;
+
+            #[inline(always)]
             fn bitor(self, rhs: Self) -> Self {
                 self.zip_map(rhs, |x, y| x | y)
             }
@@ -105,6 +110,8 @@ macro_rules! impl_bool_simd (
 
         impl BitXor<AutoSimd<$t>> for AutoSimd<$t> {
             type Output = Self;
+
+            #[inline(always)]
             fn bitxor(self, rhs: Self) -> Self {
                 self.zip_map(rhs, |x, y| x ^ y)
             }
