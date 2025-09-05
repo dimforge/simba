@@ -119,23 +119,23 @@ macro_rules! impl_wide_f32 (
             pub const ONE: Self = $WideF32xX(<wide::$f32xX>::ONE);
 
             #[inline(always)]
-            fn into_arr(self) -> [$f32; $lanes] {
+            pub fn into_arr(self) -> [$f32; $lanes] {
                 self.0.into()
             }
 
             #[inline(always)]
-            fn from_arr(arr: [$f32; $lanes]) -> Self {
+            pub fn from_arr(arr: [$f32; $lanes]) -> Self {
                 Self(arr.into())
             }
 
             #[inline(always)]
-            fn map(self, f: impl Fn($f32) -> $f32) -> Self {
+            pub fn map(self, f: impl Fn($f32) -> $f32) -> Self {
                 let arr = self.into_arr();
                 Self::from([f(arr[0]), $(f(arr[$ii])),+])
             }
 
             #[inline(always)]
-            fn zip_map(self, rhs: Self, f: impl Fn($f32, $f32) -> $f32) -> Self {
+            pub fn zip_map(self, rhs: Self, f: impl Fn($f32, $f32) -> $f32) -> Self {
                 let arr = self.into_arr();
                 let rhs = rhs.into_arr();
                 Self::from([
@@ -146,11 +146,13 @@ macro_rules! impl_wide_f32 (
         }
 
         impl $WideBoolF32xX {
-            fn from_arr(arr: [$f32; $lanes]) -> Self {
+            #[inline(always)]
+            pub fn from_arr(arr: [$f32; $lanes]) -> Self {
                 Self(arr.into())
             }
 
-            fn into_arr(self) -> [$f32; $lanes] {
+            #[inline(always)]
+            pub fn into_arr(self) -> [$f32; $lanes] {
                 self.0.into()
             }
         }
