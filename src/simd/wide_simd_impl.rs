@@ -321,17 +321,17 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn all(self) -> bool {
-                self == Self(!wide::$f32xX::ZERO)
+                self.0.all()
             }
 
             #[inline(always)]
             fn any(self) -> bool {
-                self != Self(wide::$f32xX::ZERO)
+                self.0.any()
             }
 
             #[inline(always)]
             fn none(self) -> bool {
-                self == Self(wide::$f32xX::ZERO)
+                self.0.none()
             }
 
             #[inline(always)]
@@ -1029,7 +1029,8 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn simd_sin_cos(self) -> (Self, Self) {
-                (self.simd_sin(), self.simd_cos())
+                let (sin, cos) = self.0.sin_cos();
+                ($WideF32xX(sin), $WideF32xX(cos))
             }
 
             //            #[inline(always]
