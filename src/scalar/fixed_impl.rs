@@ -76,19 +76,19 @@ macro_rules! impl_fixed_type (
         }
 
         #[cfg(feature = "rand")]
-        impl<Fract: $LeEqDim> rand::distributions::Distribution<$FixedI<Fract>> for rand::distributions::Standard {
+        impl<Fract: $LeEqDim> rand::distr::Distribution<$FixedI<Fract>> for rand::distr::StandardUniform {
             #[inline]
             fn sample<'a, G: rand::Rng + ?Sized>(&self, rng: &mut G) -> $FixedI<Fract> {
-                let bits = rng.gen();
+                let bits = rng.random();
                 $FixedI(fixed::$FixedI::from_bits(bits))
             }
         }
 
         #[cfg(feature = "rand")]
-        impl<Fract: $LeEqDim> rand::distributions::Distribution<$FixedI<Fract>> for rand::distributions::OpenClosed01 {
+        impl<Fract: $LeEqDim> rand::distr::Distribution<$FixedI<Fract>> for rand::distr::OpenClosed01 {
             #[inline]
             fn sample<'a, G: rand::Rng + ?Sized>(&self, rng: &mut G) -> $FixedI<Fract> {
-                let val: f64 = rng.gen();
+                let val: f64 = rng.random();
                 $FixedI(fixed::$FixedI::from_num(val))
             }
         }

@@ -1,3 +1,6 @@
+use core::mem::{size_of, MaybeUninit};
+use core::slice;
+
 use crate::simd::*;
 
 // Given two token streams in the format `ignore_snd!([first_token_tree], [second])` will simply
@@ -9,7 +12,7 @@ macro_rules! ignore_snd (
 
 macro_rules! impl_rand_auto_simd (
     ($($t: ty, $($i: ident),*;)*) => ($(
-        impl rand::distributions::Distribution<AutoSimd<$t>> for rand::distributions::Standard {
+        impl rand::distr::Distribution<AutoSimd<$t>> for rand::distr::StandardUniform {
             #[inline(always)]
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> AutoSimd<$t> {
                 AutoSimd::<$t>::new($(
@@ -49,9 +52,6 @@ impl_rand_auto_simd!(
     [i8; 16], _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
     [i8; 32], _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
     // [i8; 64], _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    [isize; 2], _0, _1;
-    [isize; 4], _0, _1, _2, _3;
-    [isize; 8], _0, _1, _2, _3, _4, _5, _6, _7;
     [u128; 1], _0;
     [u128; 2], _0, _1;
     [u128; 4], _0, _1, _2, _3;
@@ -73,9 +73,6 @@ impl_rand_auto_simd!(
     [u8; 16], _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
     [u8; 32], _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
     // [u8; 64], _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    [usize; 2], _0, _1;
-    [usize; 4], _0, _1, _2, _3;
-    [usize; 8], _0, _1, _2, _3, _4, _5, _6, _7;
     [bool; 1], _0;
     [bool; 2], _0, _1;
     [bool; 4], _0, _1, _2, _3;
@@ -85,10 +82,32 @@ impl_rand_auto_simd!(
     // [bool; 64], _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
 );
 
+macro_rules! impl_rand_auto_simd_xsize (
+    ($($t: ty, $sampler: ident, $($i: ident),*;)*) => ($(
+        impl rand::distr::Distribution<AutoSimd<$t>> for rand::distr::StandardUniform {
+            #[inline(always)]
+            fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> AutoSimd<$t> {
+                AutoSimd::<$t>::new($(
+                    ignore_snd!([$sampler(rng)], [$i])
+                ),*)
+            }
+        }
+    )*)
+);
+
+impl_rand_auto_simd_xsize!(
+    [isize; 2], sample_isize, _0, _1;
+    [isize; 4], sample_isize, _0, _1, _2, _3;
+    [isize; 8], sample_isize, _0, _1, _2, _3, _4, _5, _6, _7;
+    [usize; 2], sample_usize, _0, _1;
+    [usize; 4], sample_usize, _0, _1, _2, _3;
+    [usize; 8], sample_usize, _0, _1, _2, _3, _4, _5, _6, _7;
+);
+
 #[cfg(feature = "wide")]
 macro_rules! impl_rand_wide_simd (
     ($($t: ident, $wrapped: ty, $arr: ty;)*) => ($(
-        impl rand::distributions::Distribution<$t> for rand::distributions::Standard {
+        impl rand::distr::Distribution<$t> for rand::distr::StandardUniform {
             #[inline(always)]
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $t {
                 $t(<$wrapped as From<$arr>>::from(self.sample(rng)))
@@ -107,7 +126,7 @@ impl_rand_wide_simd!(
 #[cfg(feature = "portable_simd")]
 macro_rules! impl_rand_portable_simd (
     ($($wrapped: ty, $($i: ident),*;)*) => ($(
-        impl rand::distributions::Distribution<$wrapped> for rand::distributions::Standard {
+        impl rand::distr::Distribution<$wrapped> for rand::distr::StandardUniform {
             #[inline(always)]
             fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $wrapped {
                 <$wrapped>::new($(
@@ -145,9 +164,6 @@ impl_rand_portable_simd!(
     i8x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
     i8x32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
     i8x64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    isizex2, _0, _1;
-    isizex4, _0, _1, _2, _3;
-    isizex8, _0, _1, _2, _3, _4, _5, _6, _7;
     u16x2, _0, _1;
     u16x4, _0, _1, _2, _3;
     u16x8, _0, _1, _2, _3, _4, _5, _6, _7;
@@ -166,9 +182,6 @@ impl_rand_portable_simd!(
     u8x16, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
     u8x32, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31;
     u8x64, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, _50, _51, _52, _53, _54, _55, _56, _57, _58, _59, _60, _61, _62, _63;
-    usizex2, _0, _1;
-    usizex4, _0, _1, _2, _3;
-    usizex8, _0, _1, _2, _3, _4, _5, _6, _7;
     mask16x2, _0, _1;
     mask16x4, _0, _1, _2, _3;
     mask16x8, _0, _1, _2, _3, _4, _5, _6, _7;
@@ -191,3 +204,51 @@ impl_rand_portable_simd!(
     masksizex4, _0, _1, _2, _3;
     masksizex8, _0, _1, _2, _3, _4, _5, _6, _7;
 );
+
+#[cfg(feature = "portable_simd")]
+macro_rules! impl_rand_portable_simd_xsize (
+    ($($wrapped: ty, $sampler: ident, $($i: ident),*;)*) => ($(
+        impl rand::distr::Distribution<$wrapped> for rand::distr::StandardUniform {
+            #[inline(always)]
+            fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> $wrapped {
+                <$wrapped>::new($(
+                    ignore_snd!([$sampler(rng)], [$i])
+                ),*)
+            }
+        }
+    )*)
+);
+
+#[cfg(feature = "portable_simd")]
+impl_rand_portable_simd_xsize!(
+    isizex2, sample_isize, _0, _1;
+    isizex4, sample_isize, _0, _1, _2, _3;
+    isizex8, sample_isize, _0, _1, _2, _3, _4, _5, _6, _7;
+    usizex2, sample_usize, _0, _1;
+    usizex4, sample_usize, _0, _1, _2, _3;
+    usizex8, sample_usize, _0, _1, _2, _3, _4, _5, _6, _7;
+);
+
+#[inline(always)]
+fn sample_isize<R: rand::Rng + ?Sized>(rng: &mut R) -> isize {
+    let mut result: MaybeUninit<isize> = MaybeUninit::uninit();
+    unsafe {
+        rng.fill_bytes(slice::from_raw_parts_mut(
+            result.as_mut_ptr().cast(),
+            size_of::<isize>(),
+        ));
+        result.assume_init()
+    }
+}
+
+#[inline(always)]
+fn sample_usize<R: rand::Rng + ?Sized>(rng: &mut R) -> usize {
+    let mut result: MaybeUninit<usize> = MaybeUninit::uninit();
+    unsafe {
+        rng.fill_bytes(slice::from_raw_parts_mut(
+            result.as_mut_ptr().cast(),
+            size_of::<usize>(),
+        ));
+        result.assume_init()
+    }
+}
