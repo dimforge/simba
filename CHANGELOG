@@ -1,3 +1,6 @@
+## Unreleased
+- `rand` dependency updated to 0.9.
+
 ## Release v0.9.1 (05 Sept. 2025)
 - `into_arr`, `from_arr`, `map`, `zip_map` are now public on `WideF32x4`, `WideF32x8` and `WideF64x4`.
 - `from_arr` and `into_arr` are now public on `WideBoolF32x4`, `WideBoolF32x8`, `WideBoolF64x4`.
