@@ -58,6 +58,8 @@ macro_rules! impl_bool_simd (
 
                 write!(f, "({}", self.extract(0))?;
 
+                // Suppress warning for single-lanes values.
+                #[allow(clippy::reversed_empty_ranges)]
                 for i in 1..Self::LANES {
                     write!(f, ", {}", self.extract(i))?;
                 }
@@ -279,6 +281,8 @@ macro_rules! impl_simd_value (
 
                 write!(f, "({}", self.extract(0))?;
 
+                // Suppress warning for single-lanes values.
+                #[allow(clippy::reversed_empty_ranges)]
                 for i in 1..Self::LANES {
                     write!(f, ", {}", self.extract(i))?;
                 }
@@ -1070,6 +1074,9 @@ macro_rules! impl_float_simd (
             #[inline(always)]
             fn simd_horizontal_product(self) -> Self::Element {
                 let mut prod = self.extract(0);
+
+                // Suppress warning for single-lanes values.
+                #[allow(clippy::reversed_empty_ranges)]
                 for ii in 1..Self::LANES {
                     prod *= self.extract(ii)
                 }
