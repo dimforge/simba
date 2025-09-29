@@ -31,7 +31,140 @@ SubsetOf<Self>
 {
     /// Type of the coefficients of a complex number.
     type SimdRealField: SimdRealField<SimdBool=<Self as SimdValue>::SimdBool>;
-    complex_trait_methods!(SimdRealField, simd_);
+    /// Builds a pure-real complex number from the given value.
+    fn from_simd_real(re: Self::SimdRealField) -> Self;
+
+    /// The real part of this complex number.
+    fn simd_real(self) -> Self::SimdRealField;
+
+    /// The imaginary part of this complex number.
+    fn simd_imaginary(self) -> Self::SimdRealField;
+
+    /// The modulus of this complex number.
+    fn simd_modulus(self) -> Self::SimdRealField;
+
+    /// The squared modulus of this complex number.
+    fn simd_modulus_squared(self) -> Self::SimdRealField;
+
+    /// The argument of this complex number.
+    fn simd_argument(self) -> Self::SimdRealField;
+
+    /// The sum of the absolute value of this complex number's real and imaginary part.
+    fn simd_norm1(self) -> Self::SimdRealField;
+
+    /// Multiplies this complex number by `factor`.
+    fn simd_scale(self, factor: Self::SimdRealField) -> Self;
+
+    /// Divides this complex number by `factor`.
+    fn simd_unscale(self, factor: Self::SimdRealField) -> Self;
+
+    /// The polar form of this complex number: (modulus, arg)
+    fn simd_to_polar(self) -> (Self::SimdRealField, Self::SimdRealField) {
+        (self.clone().simd_modulus(), self.simd_argument())
+    }
+
+    /// The exponential form of this complex number: (modulus, e^{i arg})
+    fn simd_to_exp(self) -> (Self::SimdRealField, Self) {
+        let m = self.clone().simd_modulus();
+
+        if !m.is_zero() {
+            (m.clone(), self.simd_unscale(m))
+        } else {
+            (Self::SimdRealField::zero(), Self::one())
+        }
+    }
+
+    /// The exponential part of this complex number: `self / self.modulus()`
+    fn simd_signum(self) -> Self {
+        self.simd_to_exp().1
+    }
+
+    fn simd_floor(self) -> Self;
+    fn simd_ceil(self) -> Self;
+    fn simd_round(self) -> Self;
+    fn simd_trunc(self) -> Self;
+    fn simd_fract(self) -> Self;
+    fn simd_mul_add(self, a: Self, b: Self) -> Self;
+
+    /// The absolute value of this complex number: `self / self.signum()`.
+    ///
+    /// This is equivalent to `self.modulus()`.
+    fn simd_abs(self) -> Self::SimdRealField;
+
+    /// Computes (self.conjugate() * self + other.conjugate() * other).sqrt()
+    fn simd_hypot(self, other: Self) -> Self::SimdRealField;
+
+    fn simd_recip(self) -> Self;
+    fn simd_conjugate(self) -> Self;
+    fn simd_sin(self) -> Self;
+    fn simd_cos(self) -> Self;
+    fn simd_sin_cos(self) -> (Self, Self);
+    #[inline]
+    fn simd_sinh_cosh(self) -> (Self, Self) {
+        (self.clone().simd_sinh(), self.simd_cosh())
+    }
+    fn simd_tan(self) -> Self;
+    fn simd_asin(self) -> Self;
+    fn simd_acos(self) -> Self;
+    fn simd_atan(self) -> Self;
+    fn simd_sinh(self) -> Self;
+    fn simd_cosh(self) -> Self;
+    fn simd_tanh(self) -> Self;
+    fn simd_asinh(self) -> Self;
+    fn simd_acosh(self) -> Self;
+    fn simd_atanh(self) -> Self;
+
+    /// Cardinal sine
+    #[inline]
+    fn simd_sinc(self) -> Self {
+        if self.is_zero() {
+            Self::one()
+        } else {
+            self.clone().simd_sin() / self
+        }
+    }
+
+    #[inline]
+    fn simd_sinhc(self) -> Self {
+        if self.is_zero() {
+            Self::one()
+        } else {
+            self.clone().simd_sinh() / self
+        }
+    }
+
+    /// Cardinal cos
+    #[inline]
+    fn simd_cosc(self) -> Self {
+        if self.is_zero() {
+            Self::one()
+        } else {
+            self.clone().simd_cos() / self
+        }
+    }
+
+    #[inline]
+    fn simd_coshc(self) -> Self {
+        if self.is_zero() {
+            Self::one()
+        } else {
+            self.clone().simd_cosh() / self
+        }
+    }
+
+    fn simd_log(self, base: Self::SimdRealField) -> Self;
+    fn simd_log2(self) -> Self;
+    fn simd_log10(self) -> Self;
+    fn simd_ln(self) -> Self;
+    fn simd_ln_1p(self) -> Self;
+    fn simd_sqrt(self) -> Self;
+    fn simd_exp(self) -> Self;
+    fn simd_exp2(self) -> Self;
+    fn simd_exp_m1(self) -> Self;
+    fn simd_powi(self, n: i32) -> Self;
+    fn simd_powf(self, n: Self::SimdRealField) -> Self;
+    fn simd_powc(self, n: Self) -> Self;
+    fn simd_cbrt(self) -> Self;
 
     /// Computes the sum of all the lanes of `self`.
     fn simd_horizontal_sum(self) -> Self::Element;
