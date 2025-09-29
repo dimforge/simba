@@ -105,7 +105,7 @@ macro_rules! impl_real (
             /// The smallest finite positive value representable using this type.
             #[inline]
             fn min_value() -> Option<Self> {
-                Some($M::MIN)
+                Some($M::MIN_POSITIVE)
             }
 
             /// The largest finite positive value representable using this type.
