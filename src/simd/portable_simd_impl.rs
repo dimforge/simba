@@ -21,7 +21,7 @@ use std::{
     simd::{
         self as portable_simd, cmp::SimdOrd, cmp::SimdPartialEq,
         cmp::SimdPartialOrd as PortableSimdPartialOrd, num::SimdFloat, num::SimdInt, num::SimdUint,
-        StdFloat,
+        Select, StdFloat,
     },
 };
 
@@ -109,8 +109,8 @@ macro_rules! impl_bool_simd (
 
             #[inline(always)]
             fn select(self, cond: Self::SimdBool, other: Self) -> Self {
-                let x = cond.0.select(self.0.to_int(), other.0.to_int());
-                Self(<$t>::from_int(x))
+                let x = cond.0.select(self.0.to_simd(), other.0.to_simd());
+                Self(<$t>::from_simd(x))
             }
         }
 
@@ -163,17 +163,17 @@ macro_rules! impl_bool_simd (
 
             #[inline(always)]
             fn and(self) -> bool {
-                self.0.to_int().reduce_and() != 0
+                self.0.to_simd().reduce_and() != 0
             }
 
             #[inline(always)]
             fn or(self) -> bool {
-                self.0.to_int().reduce_or() != 0
+                self.0.to_simd().reduce_or() != 0
             }
 
             #[inline(always)]
             fn xor(self) -> bool {
-                self.0.to_int().reduce_xor() != 0
+                self.0.to_simd().reduce_xor() != 0
             }
 
             #[inline(always)]
