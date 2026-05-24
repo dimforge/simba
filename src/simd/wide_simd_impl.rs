@@ -625,32 +625,32 @@ macro_rules! impl_wide_f32 (
         impl SimdPartialOrd for $WideF32xX {
             #[inline(always)]
             fn simd_gt(self, other: Self) -> Self::SimdBool {
-                $WideBoolF32xX(self.0.cmp_gt(other.0))
+                $WideBoolF32xX(self.0.simd_gt(other.0))
             }
 
             #[inline(always)]
             fn simd_lt(self, other: Self) -> Self::SimdBool {
-                $WideBoolF32xX(self.0.cmp_lt(other.0))
+                $WideBoolF32xX(self.0.simd_lt(other.0))
             }
 
             #[inline(always)]
             fn simd_ge(self, other: Self) -> Self::SimdBool {
-                $WideBoolF32xX(self.0.cmp_ge(other.0))
+                $WideBoolF32xX(self.0.simd_ge(other.0))
             }
 
             #[inline(always)]
             fn simd_le(self, other: Self) -> Self::SimdBool {
-                $WideBoolF32xX(self.0.cmp_le(other.0))
+                $WideBoolF32xX(self.0.simd_le(other.0))
             }
 
             #[inline(always)]
             fn simd_eq(self, other: Self) -> Self::SimdBool {
-                $WideBoolF32xX(self.0.cmp_eq(other.0))
+                $WideBoolF32xX(self.0.simd_eq(other.0))
             }
 
             #[inline(always)]
             fn simd_ne(self, other: Self) -> Self::SimdBool {
-                $WideBoolF32xX(self.0.cmp_ne(other.0))
+                $WideBoolF32xX(self.0.simd_ne(other.0))
             }
 
             #[inline(always)]
@@ -862,7 +862,7 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn simd_to_exp(self) -> (Self::SimdRealField, Self) {
-                let ge = self.0.cmp_ge(Self::one().0);
+                let ge = self.0.simd_ge(Self::one().0);
                 let exp = ge.blend(Self::one().0, -Self::one().0);
                 ($WideF32xX(self.0 * exp), $WideF32xX(exp))
             }
