@@ -1,6 +1,3 @@
-use core::mem::{size_of, MaybeUninit};
-use core::slice;
-
 use crate::simd::*;
 
 // Given two token streams in the format `ignore_snd!([first_token_tree], [second])` will simply
@@ -231,24 +228,14 @@ impl_rand_portable_simd_xsize!(
 
 #[inline(always)]
 fn sample_isize<R: rand::Rng + ?Sized>(rng: &mut R) -> isize {
-    let mut result: MaybeUninit<isize> = MaybeUninit::uninit();
-    unsafe {
-        rng.fill_bytes(slice::from_raw_parts_mut(
-            result.as_mut_ptr().cast(),
-            size_of::<isize>(),
-        ));
-        result.assume_init()
-    }
+    let mut bytes = [0u8; _];
+    rng.fill_bytes(&mut bytes);
+    isize::from_le_bytes(bytes)
 }
 
 #[inline(always)]
 fn sample_usize<R: rand::Rng + ?Sized>(rng: &mut R) -> usize {
-    let mut result: MaybeUninit<usize> = MaybeUninit::uninit();
-    unsafe {
-        rng.fill_bytes(slice::from_raw_parts_mut(
-            result.as_mut_ptr().cast(),
-            size_of::<usize>(),
-        ));
-        result.assume_init()
-    }
+    let mut bytes = [0u8; _];
+    rng.fill_bytes(&mut bytes);
+    usize::from_le_bytes(bytes)
 }
