@@ -1,4 +1,5 @@
 ## Unreleased
+- `rand` dependency updated to 0.9.
 - Add single-lanes portable-simd trait implementations.
 
 ## Release v0.9.1 (05 Sept. 2025)
