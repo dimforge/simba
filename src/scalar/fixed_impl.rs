@@ -9,6 +9,8 @@ use fixed::types::extra::{
     U30, U31, U4, U5, U6, U60, U61, U62, U63, U7,
 };
 use num::{Bounded, FromPrimitive, Num, One, Signed, Zero};
+#[cfg(feature = "rand")]
+use rand::RngExt;
 #[cfg(feature = "serde_serialize")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::cmp::Ordering;
@@ -16,8 +18,6 @@ use std::hash::{Hash, Hasher};
 use std::ops::{
     Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
 };
-#[cfg(feature = "rand")]
-use rand::RngExt;
 
 macro_rules! impl_fixed_type (
     ($($FixedI: ident, $Int: ident, $LeEqDim: ident, $LeEqDim1: ident, $LeEqDim2: ident, $LeEqDim3: ident, $LeEqDim4: ident;)*) => {$(
