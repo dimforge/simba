@@ -1,6 +1,14 @@
-## Unreleased
-- `rand` dependency updated to 0.9.
-- Add single-lanes portable-simd trait implementations.
+## Release v0.10.0 (24 May 2026)
+- Update the `rand` dependency to 0.10 (from 0.8). As a side-effect, the `Distribution<T> for StandardUniform`
+  implementations for SIMD types containing `isize`/`usize` now generate random values via `fill_bytes()`, because
+  `rand` 0.9 removed the uniform distribution for `isize`/`usize`. See [#76](https://github.com/dimforge/simba/pull/76).
+- Update the `wide` dependency to 1.0 (from 0.7). See [#78](https://github.com/dimforge/simba/pull/78).
+- Add the `f32x1`, `f64x1`, `i*x1`, `u*x1`, `m*x1` type aliases (and the corresponding trait implementations) when
+  the `portable_simd` feature is enabled. See [#67](https://github.com/dimforge/simba/pull/67).
+- Fix build with the `portable_simd` feature on recent `nightly` (adapt to `Mask::from_int`/`to_int` being renamed
+  to `from_simd`/`to_simd`). See [#79](https://github.com/dimforge/simba/pull/79).
+- Drop the `paste` build-time dependency; the macro-generated `ComplexField`/`SimdComplexField` method declarations
+  are now written out explicitly. See [#71](https://github.com/dimforge/simba/pull/71).
 
 ## Release v0.9.1 (05 Sept. 2025)
 - `into_arr`, `from_arr`, `map`, `zip_map` are now public on `WideF32x4`, `WideF32x8` and `WideF64x4`.

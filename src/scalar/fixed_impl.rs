@@ -9,6 +9,8 @@ use fixed::types::extra::{
     U30, U31, U4, U5, U6, U60, U61, U62, U63, U7,
 };
 use num::{Bounded, FromPrimitive, Num, One, Signed, Zero};
+#[cfg(feature = "rand")]
+use rand::RngExt;
 #[cfg(feature = "serde_serialize")]
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::cmp::Ordering;
