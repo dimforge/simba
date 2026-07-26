@@ -164,7 +164,9 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn splat(val: Self::Element) -> Self {
-                $WideF32xX(wide::$f32xX::from(val))
+                // NOTE: we don’t use `wide::$f32xX::from(val)` because this results in
+                //       an inefficient `memset_pattern16` libc call.
+                $WideF32xX(wide::$f32xX::new([val, $({ let _ = $ii; val }),+]))
             }
 
             #[inline(always)]
@@ -727,7 +729,7 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn simd_copysign(self, sign: Self) -> Self {
-                let neg_zero = wide::$f32xX::from(-0.0);
+                let neg_zero = <Self as SimdValue>::splat(-0.0).0;
                 $WideF32xX((neg_zero & sign.0) | ((!neg_zero) & self.0))
             }
 
