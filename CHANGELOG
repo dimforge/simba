@@ -1,3 +1,11 @@
+## Unreleased
+- Bump the minimum `wide` version to 1.6, and switch from the deprecated `blend`/`Cmp*` APIs to `select` and the
+  inherent `simd_*` comparison methods.
+- The `WideF32xX`/`WideF64xX` math functions now go through `ComplexField`/`RealField` instead of the inherent `std`
+  methods, so they honor the `libm_force` feature. Under `libm_force`, `simd_sin`, `simd_cos` and `simd_sin_cos` are
+  computed per-lane with `libm` instead of `wide`'s SIMD polynomials.
+- `SimdValue::splat` for the wide types no longer emits a `memset_pattern16` libc call.
+
 ## Release v0.10.0 (24 May 2026)
 - Update the `rand` dependency to 0.10 (from 0.8). As a side-effect, the `Distribution<T> for StandardUniform`
   implementations for SIMD types containing `isize`/`usize` now generate random values via `fill_bytes()`, because
