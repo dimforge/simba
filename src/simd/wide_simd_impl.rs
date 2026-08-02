@@ -3,7 +3,7 @@
 
 //! Traits for SIMD values.
 
-use crate::scalar::{ComplexField, Field, SubsetOf, SupersetOf};
+use crate::scalar::{ComplexField, Field, RealField, SubsetOf, SupersetOf};
 use crate::simd::{
     PrimitiveSimdValue, SimdBool, SimdComplexField, SimdPartialOrd, SimdRealField, SimdSigned,
     SimdValue,
@@ -18,7 +18,6 @@ use std::{
         RemAssign, Sub, SubAssign,
     },
 };
-use wide::{CmpEq, CmpGe, CmpGt, CmpLe, CmpLt, CmpNe};
 
 #[cfg(feature = "rkyv")]
 macro_rules! impl_rkyv {
@@ -164,7 +163,9 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn splat(val: Self::Element) -> Self {
-                $WideF32xX(wide::$f32xX::from(val))
+                // NOTE: we don’t use `wide::$f32xX::from(val)` because this results in
+                //       an inefficient `memset_pattern16` libc call.
+                $WideF32xX(wide::$f32xX::new([val, $({ let _ = $ii; val }),+]))
             }
 
             #[inline(always)]
@@ -193,7 +194,7 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn select(self, cond: Self::SimdBool, other: Self) -> Self {
-                $WideF32xX(cond.0.blend(self.0, other.0))
+                $WideF32xX(cond.0.select(self.0, other.0))
             }
         }
 
@@ -239,7 +240,7 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn select(self, cond: Self::SimdBool, other: Self) -> Self {
-                $WideBoolF32xX(cond.0.blend(self.0, other.0))
+                $WideBoolF32xX(cond.0.select(self.0, other.0))
             }
         }
 
@@ -722,12 +723,12 @@ macro_rules! impl_wide_f32 (
         impl SimdRealField for $WideF32xX {
             #[inline(always)]
             fn simd_atan2(self, other: Self) -> Self {
-                self.zip_map_lanes(other, |a, b| a.atan2(b))
+                self.zip_map_lanes(other, <$f32 as RealField>::atan2)
             }
 
             #[inline(always)]
             fn simd_copysign(self, sign: Self) -> Self {
-                let neg_zero = wide::$f32xX::from(-0.0);
+                let neg_zero = <Self as SimdValue>::splat(-0.0).0;
                 $WideF32xX((neg_zero & sign.0) | ((!neg_zero) & self.0))
             }
 
@@ -863,7 +864,7 @@ macro_rules! impl_wide_f32 (
             #[inline(always)]
             fn simd_to_exp(self) -> (Self::SimdRealField, Self) {
                 let ge = self.0.simd_ge(Self::one().0);
-                let exp = ge.blend(Self::one().0, -Self::one().0);
+                let exp = ge.select(Self::one().0, -Self::one().0);
                 ($WideF32xX(self.0 * exp), $WideF32xX(exp))
             }
 
@@ -934,12 +935,12 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn simd_powf(self, n: Self) -> Self {
-                self.zip_map_lanes(n, |e, n| e.powf(n))
+                self.zip_map_lanes(n, <$f32 as ComplexField>::powf)
             }
 
             #[inline(always)]
             fn simd_powc(self, n: Self) -> Self {
-                self.zip_map_lanes(n, |e, n| e.powf(n))
+                self.zip_map_lanes(n, <$f32 as ComplexField>::powf)
             }
 
             #[inline(always)]
@@ -949,128 +950,160 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn simd_exp(self) -> Self {
-                self.map_lanes(|e| e.exp())
+                self.map_lanes(<$f32 as ComplexField>::exp)
             }
 
             #[inline(always)]
             fn simd_exp2(self) -> Self {
-                self.map_lanes(|e| e.exp2())
+                self.map_lanes(<$f32 as ComplexField>::exp2)
             }
 
             #[inline(always)]
             fn simd_exp_m1(self) -> Self {
-                self.map_lanes(|e| e.exp_m1())
+                self.map_lanes(<$f32 as ComplexField>::exp_m1)
             }
 
             #[inline(always)]
             fn simd_ln_1p(self) -> Self {
-                self.map_lanes(|e| e.ln_1p())
+                self.map_lanes(<$f32 as ComplexField>::ln_1p)
             }
 
             #[inline(always)]
             fn simd_ln(self) -> Self {
-                self.map_lanes(|e| e.ln())
+                self.map_lanes(<$f32 as ComplexField>::ln)
             }
 
             #[inline(always)]
             fn simd_log(self, base: Self) -> Self {
-                self.zip_map_lanes(base, |e, b| e.log(b))
+                // Same formula as `std`'s `log`, per-lane.
+                self.zip_map_lanes(base, |e, b| <$f32 as ComplexField>::ln(e) / <$f32 as ComplexField>::ln(b))
             }
 
             #[inline(always)]
             fn simd_log2(self) -> Self {
-                self.map_lanes(|e| e.log2())
+                self.map_lanes(<$f32 as ComplexField>::log2)
             }
 
             #[inline(always)]
             fn simd_log10(self) -> Self {
-                self.map_lanes(|e| e.log10())
+                self.map_lanes(<$f32 as ComplexField>::log10)
             }
 
             #[inline(always)]
             fn simd_cbrt(self) -> Self {
-                self.map_lanes(|e| e.cbrt())
+                self.map_lanes(<$f32 as ComplexField>::cbrt)
             }
 
             #[inline(always)]
             fn simd_hypot(self, other: Self) -> Self::SimdRealField {
-                self.zip_map_lanes(other, |e, o| e.hypot(o))
+                self.zip_map_lanes(other, <$f32 as ComplexField>::hypot)
             }
 
+            // sin/cos/sin_cos keep wide's SIMD polynomial by default (it internally uses
+            // `mul_add`, fused on NEON but not baseline x86 — fine without a determinism
+            // requirement) and go per-lane through libm under `libm_force`.
+            #[cfg(not(feature = "libm_force"))]
             #[inline(always)]
             fn simd_sin(self) -> Self {
                 $WideF32xX(self.0.sin())
             }
 
+            #[cfg(feature = "libm_force")]
+            #[inline(always)]
+            fn simd_sin(self) -> Self {
+                self.map_lanes(<$f32 as ComplexField>::sin)
+            }
+
+            #[cfg(not(feature = "libm_force"))]
             #[inline(always)]
             fn simd_cos(self) -> Self {
                 $WideF32xX(self.0.cos())
             }
 
+            #[cfg(feature = "libm_force")]
+            #[inline(always)]
+            fn simd_cos(self) -> Self {
+                self.map_lanes(<$f32 as ComplexField>::cos)
+            }
+
             #[inline(always)]
             fn simd_tan(self) -> Self {
-                self.map_lanes(|e| e.tan())
+                self.map_lanes(<$f32 as ComplexField>::tan)
             }
 
             #[inline(always)]
             fn simd_asin(self) -> Self {
-                self.map_lanes(|e| e.asin())
+                self.map_lanes(<$f32 as ComplexField>::asin)
             }
 
             #[inline(always)]
             fn simd_acos(self) -> Self {
-                self.map_lanes(|e| e.acos())
+                self.map_lanes(<$f32 as ComplexField>::acos)
             }
 
             #[inline(always)]
             fn simd_atan(self) -> Self {
-                self.map_lanes(|e| e.atan())
+                self.map_lanes(<$f32 as ComplexField>::atan)
             }
 
+            #[cfg(not(feature = "libm_force"))]
             #[inline(always)]
             fn simd_sin_cos(self) -> (Self, Self) {
                 let (sin, cos) = self.0.sin_cos();
                 ($WideF32xX(sin), $WideF32xX(cos))
             }
 
+            #[cfg(feature = "libm_force")]
+            #[inline(always)]
+            fn simd_sin_cos(self) -> (Self, Self) {
+                let mut sin = self;
+                let mut cos = self;
+                for ii in 0..$lanes {
+                    let (s, c) = <$f32 as ComplexField>::sin_cos(self.extract(ii));
+                    sin.replace(ii, s);
+                    cos.replace(ii, c);
+                }
+                (sin, cos)
+            }
+
             //            #[inline(always]
             //            fn simd_exp_m1(self) -> Self {
-            //                $libm::exp_m1(self)
+            //                <$f32 as ComplexField>::exp_m1(self)
             //            }
             //
             //            #[inline(always]
             //            fn simd_ln_1p(self) -> Self {
-            //                $libm::ln_1p(self)
+            //                <$f32 as ComplexField>::ln_1p(self)
             //            }
             //
             #[inline(always)]
             fn simd_sinh(self) -> Self {
-                self.map_lanes(|e| e.sinh())
+                self.map_lanes(<$f32 as ComplexField>::sinh)
             }
 
             #[inline(always)]
             fn simd_cosh(self) -> Self {
-                self.map_lanes(|e| e.cosh())
+                self.map_lanes(<$f32 as ComplexField>::cosh)
             }
 
             #[inline(always)]
             fn simd_tanh(self) -> Self {
-                self.map_lanes(|e| e.tanh())
+                self.map_lanes(<$f32 as ComplexField>::tanh)
             }
 
             #[inline(always)]
             fn simd_asinh(self) -> Self {
-                self.map_lanes(|e| e.asinh())
+                self.map_lanes(<$f32 as ComplexField>::asinh)
             }
 
             #[inline(always)]
             fn simd_acosh(self) -> Self {
-                self.map_lanes(|e| e.acosh())
+                self.map_lanes(<$f32 as ComplexField>::acosh)
             }
 
             #[inline(always)]
             fn simd_atanh(self) -> Self {
-                self.map_lanes(|e| e.atanh())
+                self.map_lanes(<$f32 as ComplexField>::atanh)
             }
         }
 
