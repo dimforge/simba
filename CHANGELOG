@@ -1,4 +1,4 @@
-## Unreleased
+## Release v0.10.1 (02 August 2026)
 - Bump the minimum `wide` version to 1.6, and switch from the deprecated `blend`/`Cmp*` APIs to `select` and the
   inherent `simd_*` comparison methods.
 - The `WideF32xX`/`WideF64xX` math functions now go through `ComplexField`/`RealField` instead of the inherent `std`
