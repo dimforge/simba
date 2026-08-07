@@ -194,7 +194,7 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn select(self, cond: Self::SimdBool, other: Self) -> Self {
-                $WideF32xX(cond.0.select(self.0, other.0))
+                $WideF32xX(cond.0.blend(self.0, other.0))
             }
         }
 
@@ -240,7 +240,7 @@ macro_rules! impl_wide_f32 (
 
             #[inline(always)]
             fn select(self, cond: Self::SimdBool, other: Self) -> Self {
-                $WideBoolF32xX(cond.0.select(self.0, other.0))
+                $WideBoolF32xX(cond.0.blend(self.0, other.0))
             }
         }
 
@@ -864,7 +864,7 @@ macro_rules! impl_wide_f32 (
             #[inline(always)]
             fn simd_to_exp(self) -> (Self::SimdRealField, Self) {
                 let ge = self.0.simd_ge(Self::one().0);
-                let exp = ge.select(Self::one().0, -Self::one().0);
+                let exp = ge.blend(Self::one().0, -Self::one().0);
                 ($WideF32xX(self.0 * exp), $WideF32xX(exp))
             }
 
