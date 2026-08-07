@@ -1,3 +1,6 @@
+## Release v0.10.2 (07 August 2026)
+- Downgraded `wide` to 1.5 because its version 1.6 got yanked.
+
 ## Release v0.10.1 (02 August 2026)
 - Bump the minimum `wide` version to 1.6, and switch from the deprecated `blend`/`Cmp*` APIs to `select` and the
   inherent `simd_*` comparison methods.
